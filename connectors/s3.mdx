@@ -1,0 +1,258 @@
+---
+title: "S3 Connector"
+description: "Connect your Amazon S3 bucket to LILT for seamless translation and localization workflows"
+---
+
+## Overview
+
+The S3 connector enables you to sync and manage translation files between your Amazon S3 storage and LILT platform. This connector provides real-time translation and localization support for your stored content, making it easy to manage multilingual content at scale.
+
+## Prerequisites
+
+Before setting up the S3 connector, ensure you have:
+
+- An active Amazon S3 bucket
+- AWS Access Key ID and Secret Access Key with appropriate permissions
+- Knowledge of your S3 bucket's region
+- Files in supported formats (see [supported file types](/guides/supported-formats))
+
+## Required Configuration Parameters
+
+### Authentication
+
+<ParamField path="s3_access_key_id" type="string" required>
+  Your AWS Access Key ID for authenticating with S3
+</ParamField>
+
+<ParamField path="s3_secret_access_key" type="string" required>
+  Your AWS Secret Access Key for authenticating with S3
+</ParamField>
+
+<ParamField path="s3_region" type="string" required>
+  The AWS region where your S3 bucket is located (e.g., `us-east-1`, `eu-west-1`)
+</ParamField>
+
+### Bucket Configuration
+
+<ParamField path="rclone_backend_path" type="string" required>
+  The bucket path to import files from (e.g., `mybucket/source-files/`)
+</ParamField>
+
+<ParamField path="rclone_export_backend_path" type="string" optional>
+  The bucket path to export translated files to. If not specified, the import bucket is used
+</ParamField>
+
+## Optional Configuration Parameters
+
+### Provider Settings
+
+<ParamField path="s3_provider" type="string" default="AWS">
+  The S3 provider. Defaults to "AWS" but can be configured for S3-compatible services
+</ParamField>
+
+<ParamField path="s3_endpoint" type="string" optional>
+  Custom S3 endpoint URL for S3-compatible services (leave empty for AWS S3)
+</ParamField>
+
+### Content Filtering
+
+<ParamField path="rclone_includes" type="array" optional>
+  List of glob patterns to include specific files (e.g., `["**/*.xliff", "**/*.json"]`)
+</ParamField>
+
+<ParamField path="rclone_excludes" type="array" optional>
+  List of glob patterns to exclude specific files (e.g., `["**/temp/*", "**/*.tmp"]`)
+</ParamField>
+
+### Metadata Management
+
+<ParamField path="s3_metadata_includes" type="object" optional>
+  Key-value pairs that must be matched in S3 object metadata to include files in import. All pairs must match for inclusion.
+</ParamField>
+
+<ParamField path="s3_set_metadata_on_import" type="object" optional>
+  Key-value pairs to set as metadata on S3 objects after successful import into LILT
+</ParamField>
+
+<ParamField path="s3_set_metadata_on_export" type="object" optional>
+  Key-value pairs to set as metadata on S3 objects after successful export from LILT
+</ParamField>
+
+### Project Organization
+
+<ParamField path="s3_priority" type="string" optional>
+  S3 metadata key to use for project priority. The metadata value will be appended to the project name for organization
+</ParamField>
+
+## Setup Instructions
+
+### Step 1: Create AWS Credentials
+
+1. Log into your AWS Console
+2. Navigate to **IAM** → **Users**
+3. Create a new user or select an existing one
+4. Attach the following IAM policy for S3 access:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:ListBucket",
+        "s3:GetObjectMetadata",
+        "s3:PutObjectMetadata"
+      ],
+      "Resource": [
+        "arn:aws:s3:::your-bucket-name",
+        "arn:aws:s3:::your-bucket-name/*"
+      ]
+    }
+  ]
+}
+```
+
+5. Generate Access Keys for the user
+
+### Step 2: Configure the Connector
+
+1. In LILT, navigate to **Connectors** → **New Connector**
+2. Select **S3** from the connector list
+3. Fill in the required configuration parameters:
+   - **S3 Access Key ID**: Your AWS Access Key ID
+   - **S3 Secret Access Key**: Your AWS Secret Access Key
+   - **S3 Region**: Your bucket's region
+   - **Bucket Path**: The path within your bucket to sync files from
+
+### Step 3: Configure Content Filtering (Optional)
+
+Set up file filtering to control which files are processed:
+
+```yaml
+# Include only specific file types
+rclone_includes:
+  - "**/*.xliff"
+  - "**/*.json"
+  - "**/*.properties"
+
+# Exclude temporary or system files
+rclone_excludes:
+  - "**/temp/*"
+  - "**/.DS_Store"
+  - "**/Thumbs.db"
+```
+
+### Step 4: Test the Connection
+
+1. Click **Validate** to test your configuration
+2. The connector will verify:
+   - Authentication credentials
+   - Bucket access permissions
+   - Bucket path validity
+
+## Advanced Configuration
+
+### Metadata-Based Filtering
+
+You can filter files based on S3 object metadata:
+
+```yaml
+# Only process files with specific metadata
+s3_metadata_includes:
+  status: "ready-for-translation"
+  project: "website-2024"
+```
+
+### Automatic Metadata Updates
+
+Set metadata automatically when files are imported or exported:
+
+```yaml
+# Set metadata after import
+s3_set_metadata_on_import:
+  lilt-status: "imported"
+  last-import: "2024-01-01"
+
+# Set metadata after export
+s3_set_metadata_on_export:
+  lilt-status: "translated"
+  translation-complete: "true"
+```
+
+### Project Priority Management
+
+Use S3 metadata to automatically organize projects by priority:
+
+```yaml
+# Use the 'priority' metadata key for project organization
+s3_priority: "priority"
+```
+
+This will append the priority value to project names (e.g., "Website Translation_[priority:high]").
+
+## Best Practices
+
+### File Organization
+
+- Use a consistent folder structure in your S3 bucket
+- Separate source files from translated files using different paths
+- Use descriptive file names that include language codes
+
+### Security
+
+- Use IAM roles with minimal required permissions
+- Regularly rotate your AWS access keys
+- Enable S3 bucket versioning for backup and rollback capabilities
+
+### Performance
+
+- Use include/exclude patterns to limit the scope of file synchronization
+- Consider using metadata filters for large buckets with many files
+- Monitor your connector's performance and adjust batch sizes if needed
+
+## Troubleshooting
+
+### Connection Issues
+
+**Error**: "Failed to authenticate with given credentials"
+- **Solution**: Verify your Access Key ID and Secret Access Key are correct
+- **Solution**: Ensure the IAM user has the necessary S3 permissions
+
+**Error**: "Invalid bucket path"
+- **Solution**: Check that the bucket name and path are correct
+- **Solution**: Verify the bucket exists in the specified region
+
+### File Processing Issues
+
+**Error**: Files not being imported
+- **Solution**: Check your include/exclude patterns
+- **Solution**: Verify file formats are supported
+- **Solution**: Review metadata filtering criteria
+
+### Performance Issues
+
+**Issue**: Slow synchronization
+- **Solution**: Use more specific include patterns to reduce file count
+- **Solution**: Consider breaking large buckets into smaller, focused paths
+- **Solution**: Review and optimize your metadata filtering rules
+
+## FAQ
+
+**Q: Can I use the S3 connector with S3-compatible services?**
+A: Yes, you can use the connector with S3-compatible services by setting the `s3_provider` and `s3_endpoint` parameters accordingly.
+
+**Q: How often does the connector sync with my S3 bucket?**
+A: The sync frequency depends on your connector configuration and can be set up on a schedule or triggered manually.
+
+**Q: Can I use the same bucket for both source and translated files?**
+A: Yes, you can use the same bucket by specifying different paths for `rclone_backend_path` and `rclone_export_backend_path`.
+
+**Q: What happens if my S3 bucket has thousands of files?**
+A: Use include/exclude patterns and metadata filtering to limit the scope of synchronization and improve performance.
+
+**Q: Are there any file size limitations?**
+A: The connector can handle files of various sizes, but very large files may take longer to process. Consider your bandwidth and processing time requirements.
