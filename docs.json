@@ -1,9 +1,9 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "LILT",
   "colors": {
-    "primary": "#16A34A",
+    "primary": "#8b5cf6",
     "light": "#07C983",
     "dark": "#15803D"
   },
