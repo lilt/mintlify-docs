@@ -1,0 +1,287 @@
+---
+title: "Crowdin Connector"
+description: "Connect your Crowdin projects to LILT for seamless localization and translation management workflows"
+---
+
+## Overview
+
+The Crowdin connector enables you to integrate your Crowdin localization management platform with LILT's professional translation services. This task-based connector leverages Crowdin's robust project management infrastructure to provide automated workflows for translating your software, web, and mobile app content through LILT's AI-powered and human translation services.
+
+## Prerequisites
+
+Before setting up the Crowdin connector, ensure you have:
+
+- A Crowdin account with project management permissions
+- Admin access to invite contributors to your Crowdin projects
+- Ability to create and assign tasks within your projects
+- Projects with content ready for translation
+
+## Setup Instructions
+
+### Step 1: Invite LILT as a Project Contributor
+
+1. **Access Project Settings**
+   - Navigate to your Crowdin project
+   - Go to **Project Settings** → **Members**
+
+2. **Invite LILT Contributor**
+   - Click **Invite Members**
+   - Enter the LILT contributor email address (provided by your Account Executive)
+   - Assign appropriate permissions:
+     - **Translator** role (minimum)
+     - **Manager** role (recommended for full functionality)
+   - Send the invitation
+
+3. **Confirm Access**
+   - Wait for LILT to accept the invitation
+   - Verify the LILT contributor appears in your project members list
+
+### Step 2: Configure Project Settings
+
+1. **Set Up Languages**
+   - Ensure all target languages are configured in your project
+   - Verify language codes match LILT's supported locales
+   - Configure any custom language mappings if needed
+
+2. **Configure Workflow**
+   - Set up translation workflow steps
+   - Ensure "Translation" step is properly configured
+   - Configure review and approval processes as needed
+
+## Task-Based Translation Workflow
+
+### Creating Translation Tasks
+
+The Crowdin connector operates through Crowdin's task infrastructure. To submit content for translation:
+
+1. **Navigate to Tasks**
+   - Go to your Crowdin project
+   - Select **Tasks** → **New Task**
+
+2. **Configure Task Settings**
+   - Select **Translation** as the **Workflow Step**
+   - Choose **Skip strings already included in other tasks** to avoid conflicts
+   - Select the content (files, folders, or strings) to translate
+   - Choose source and target languages
+
+3. **Assign to LILT**
+   - In the assignment section, assign the task to the LILT contributor
+   - Assign for each target language as needed
+   - Set appropriate deadlines and priorities
+
+4. **Add Task Details**
+   - Provide a descriptive **Summary** for tracking
+   - Add any special instructions or context
+   - Include reference materials if applicable
+
+5. **Create Task**
+   - Review all settings
+   - Click **Create** to submit the task
+
+### Task Lifecycle Management
+
+**TO DO → IN PROGRESS → DONE**
+
+1. **TO DO**: Newly created tasks appear in the TO DO column
+2. **IN PROGRESS**: LILT automatically moves tasks here when processing begins
+3. **DONE**: Completed translations are delivered and moved to DONE
+
+### Content Delivery Options
+
+Tasks can be delivered in different approval states:
+- **Approved** (default): Translations are marked as approved and ready for use
+- **Non-approved**: Translations require additional review before approval
+
+Contact your LILT Production Strategist to configure the preferred delivery state.
+
+## Required Configuration Parameters
+
+### Project Setup
+
+<ParamField path="crowdin_project_id" type="string" required>
+  Your Crowdin project identifier
+</ParamField>
+
+<ParamField path="lilt_contributor_email" type="string" required>
+  The LILT contributor email address assigned to your project
+</ParamField>
+
+<ParamField path="source_language" type="string" required>
+  Source language code for translation tasks
+</ParamField>
+
+<ParamField path="target_languages" type="array" required>
+  Array of target language codes for translation
+</ParamField>
+
+### Task Configuration
+
+<ParamField path="workflow_step" type="string" required>
+  Must be set to "Translation" for proper connector operation
+</ParamField>
+
+<ParamField path="skip_duplicates" type="boolean" optional>
+  Skip strings already included in other tasks (recommended: true)
+</ParamField>
+
+<ParamField path="delivery_state" type="string" optional>
+  Delivery state for completed translations ("approved" or "non-approved")
+</ParamField>
+
+## Best Practices
+
+### Project Organization
+
+- Use consistent naming conventions for projects and tasks
+- Organize content with clear file and folder hierarchies
+- Implement proper branching strategies for different release cycles
+- Use Crowdin's labels and tags for content categorization
+
+### Task Management
+
+- Create focused tasks rather than large bulk assignments
+- Use descriptive task names that include project context and deadlines
+- Set realistic deadlines accounting for translation quality requirements
+- Group related content logically within tasks
+
+### Content Preparation
+
+- Ensure source content is finalized before creating tasks
+- Provide context through screenshots, descriptions, and reference materials
+- Use Crowdin's string comments for translator guidance
+- Implement proper key naming conventions for better context
+
+### Quality Control
+
+- Use Crowdin's review and approval workflows
+- Provide clear instructions and style guides
+- Set up automated quality checks where possible
+- Coordinate with LILT Production Strategists for optimal quality settings
+
+### Performance Optimization
+
+- Batch related content updates for efficient processing
+- Use Crowdin's filtering options to focus on high-priority content
+- Monitor task completion rates and adjust scheduling accordingly
+- Leverage translation memory for consistency and speed
+
+## Advanced Features
+
+### Multi-Project Management
+
+For organizations with multiple Crowdin projects:
+- Configure separate LILT contributors for each project if needed
+- Use consistent task management practices across projects
+- Coordinate release schedules and priorities
+- Implement cross-project translation memory sharing
+
+### Automated Workflows
+
+Set up automated processes that:
+- Trigger task creation when new content is uploaded
+- Automatically assign tasks to LILT based on language pairs
+- Send notifications when translations are completed
+- Update project status across connected systems
+
+### Integration with Development Workflows
+
+- Sync task creation with development sprints
+- Coordinate translation deadlines with release schedules
+- Use Crowdin's API for custom automation
+- Integrate with CI/CD pipelines for continuous localization
+
+## Troubleshooting
+
+### Task Creation Issues
+
+**Error**: "Cannot create task"
+- **Solution**: Verify you have appropriate permissions in the project
+- **Solution**: Check that target languages are configured in the project
+- **Solution**: Ensure source content exists and is accessible
+
+**Error**: "Contributor not found"
+- **Solution**: Verify the LILT contributor has been invited and accepted
+- **Solution**: Check that the contributor has appropriate role permissions
+- **Solution**: Confirm the contributor email address is correct
+
+### Assignment Problems
+
+**Issue**: Cannot assign task to LILT contributor
+- **Solution**: Verify the contributor has Translator or Manager role
+- **Solution**: Check that the workflow step is set to "Translation"
+- **Solution**: Ensure the target language is enabled for the contributor
+
+**Issue**: Task not moving to IN PROGRESS
+- **Solution**: Check task assignment is complete for all target languages
+- **Solution**: Verify task contains translatable content
+- **Solution**: Monitor the scheduled pull frequency for task processing
+
+### Content Processing Issues
+
+**Issue**: Translations not appearing in Crowdin
+- **Solution**: Check task status and wait for delivery completion
+- **Solution**: Verify target language settings and permissions
+- **Solution**: Review task content and ensure it meets quality requirements
+
+**Issue**: Partial translations delivered
+- **Solution**: Check for content filtering or exclusion rules
+- **Solution**: Verify all strings in the task are translatable
+- **Solution**: Review task scope and content selection
+
+### Performance Issues
+
+**Issue**: Slow task processing
+- **Solution**: Break large tasks into smaller, focused assignments
+- **Solution**: Check Crowdin API limits and project size constraints
+- **Solution**: Coordinate with LILT team for resource allocation
+
+**Issue**: Task conflicts or duplicates
+- **Solution**: Enable "Skip strings already included in other tasks"
+- **Solution**: Review existing tasks before creating new ones
+- **Solution**: Use clear task naming and organization practices
+
+## FAQ
+
+**Q: Can I create tasks for multiple languages simultaneously?**
+A: Yes, you can assign the same task to multiple target languages. Each language assignment is processed independently.
+
+**Q: How do I handle urgent translation requests?**
+A: Use Crowdin's task priority settings and coordinate directly with your LILT team for expedited processing.
+
+**Q: What happens if I update source content while a task is in progress?**
+A: Source updates may require task recreation or additional tasks for the new content. Plan content freezes before creating tasks.
+
+**Q: Can I track translation progress in real-time?**
+A: Progress can be monitored through Crowdin's task interface and status updates as tasks move through the workflow.
+
+**Q: How do I handle task revisions or feedback?**
+A: Use Crowdin's comment system and task management features. Complex revisions may require new tasks.
+
+**Q: What file formats are supported?**
+A: The connector supports all file formats that Crowdin can process, including software strings, documentation, and mobile app resources.
+
+**Q: Can I use custom workflows with the LILT connector?**
+A: Yes, coordinate with your LILT Production Strategist to configure custom workflow steps and approval processes.
+
+**Q: How do I handle translation memory and terminology?**
+A: LILT leverages your project's translation memory and can work with your terminologies to maintain consistency.
+
+## Marketplace Integration
+
+The LILT Crowdin integration is available through the [Crowdin Store](https://store.crowdin.com/partners/lilt). You can access LILT's professional translation services directly through your existing Crowdin workflow.
+
+## Connector Robustness
+
+The Crowdin connector is one of LILT's most robust integrations, providing:
+- **Enterprise-Scale**: Handles large projects with thousands of strings
+- **Reliable Processing**: Consistent task processing and delivery
+- **Flexible Workflow**: Adapts to various project management approaches
+- **Long-Term Partnerships**: Designed for ongoing client relationships with 3-4 evergreen projects
+
+## Additional Resources
+
+- Work with your LILT Production Strategist for optimal workflow configuration
+- Use Crowdin's extensive documentation for advanced project management
+- Contact your LILT Account Executive for enterprise features and custom integrations
+- Monitor performance through both Crowdin's analytics and LILT's project dashboard
+- Access the [Crowdin Store](https://store.crowdin.com/partners/lilt) for direct integration setup

@@ -1,0 +1,304 @@
+---
+title: "Episerver Connector"
+description: "Connect your Episerver CMS to LILT for seamless content translation and localization workflows"
+---
+
+## Overview
+
+The Episerver connector enables you to sync and manage translation files between your Episerver CMS and LILT platform. This connector provides automated translation workflows for your web content, making it easy to manage multilingual websites while maintaining your existing Episerver content structure and publishing workflows.
+
+## Prerequisites
+
+Before setting up the Episerver connector, ensure you have:
+
+- Episerver CMS 11+ with API access enabled
+- Admin or WebEditor permissions in Episerver
+- Access to the Episerver Content API
+- Content in supported formats (see [supported file types](/guides/supported-formats))
+- Proper permissions to create and modify content in target languages
+
+## Required Configuration Parameters
+
+### Authentication
+
+<ParamField path="episerver_url" type="string" required>
+  Your Episerver CMS URL (e.g., `https://cms.yourcompany.com`)
+</ParamField>
+
+<ParamField path="username" type="string" required>
+  Your Episerver username for authentication
+</ParamField>
+
+<ParamField path="password" type="string" required>
+  Your Episerver password (stored securely in LILT's secret management)
+</ParamField>
+
+<ParamField path="client_id" type="string" optional>
+  OAuth client ID if using OAuth authentication
+</ParamField>
+
+<ParamField path="client_secret" type="string" optional>
+  OAuth client secret if using OAuth authentication
+</ParamField>
+
+### Site Configuration
+
+<ParamField path="site_id" type="string" required>
+  Episerver site ID for the content to be translated
+</ParamField>
+
+<ParamField path="source_language" type="string" required>
+  Source language code configured in Episerver (e.g., `en`, `en-US`)
+</ParamField>
+
+<ParamField path="target_languages" type="array" required>
+  Array of target language codes configured in Episerver (e.g., `["sv", "no", "da"]`)
+</ParamField>
+
+### Content Selection
+
+<ParamField path="content_root_id" type="string" optional>
+  Root content ID to start translation from. If not specified, starts from site root
+</ParamField>
+
+<ParamField path="include_page_types" type="array" optional>
+  List of Episerver page types to include in translation
+</ParamField>
+
+<ParamField path="include_block_types" type="array" optional>
+  List of Episerver block types to include in translation
+</ParamField>
+
+## Optional Configuration Parameters
+
+### Content Filtering
+
+<ParamField path="exclude_content_types" type="array" optional>
+  List of content types to exclude from translation
+</ParamField>
+
+<ParamField path="include_properties" type="array" optional>
+  Specific content properties to include in translation (e.g., `["Title", "MainBody", "MetaDescription"]`)
+</ParamField>
+
+<ParamField path="exclude_properties" type="array" optional>
+  Content properties to exclude from translation
+</ParamField>
+
+### Publishing Settings
+
+<ParamField path="auto_publish" type="boolean" optional default="false">
+  Whether to automatically publish translated content
+</ParamField>
+
+<ParamField path="content_status" type="string" optional default="CheckedIn">
+  Status to set for translated content (`CheckedIn`, `Published`, `ReadyToPublish`)
+</ParamField>
+
+<ParamField path="approval_workflow" type="boolean" optional default="false">
+  Whether to route translated content through approval workflow
+</ParamField>
+
+### Advanced Settings
+
+<ParamField path="preserve_url_structure" type="boolean" optional default="true">
+  Whether to maintain URL structure for translated pages
+</ParamField>
+
+<ParamField path="handle_rich_text" type="boolean" optional default="true">
+  Whether to process rich text content with HTML preservation
+</ParamField>
+
+<ParamField path="translate_metadata" type="boolean" optional default="true">
+  Whether to translate page metadata (titles, descriptions, keywords)
+</ParamField>
+
+## Setup Instructions
+
+### Step 1: Configure Episerver API Access
+
+1. **Enable Content API**
+   - Navigate to **Admin** → **Config** → **Tool Settings**
+   - Ensure Content Delivery API is enabled
+   - Configure appropriate permissions for API access
+
+2. **Set Up Authentication**
+   - For basic authentication: verify user credentials
+   - For OAuth: configure OAuth application in Episerver
+   - Test API access using Episerver's API explorer
+
+### Step 2: Prepare Language Configuration
+
+1. **Configure Languages**
+   - Navigate to **Admin** → **Config** → **Site Settings**
+   - Ensure all target languages are properly configured
+   - Set up language-specific URL segments if needed
+
+2. **Verify Content Structure**
+   - Review page types and properties that need translation
+   - Identify content hierarchies and relationships
+   - Document any custom properties or complex content types
+
+### Step 3: Set Up Content Access
+
+1. **Identify Content Root**
+   - Determine the starting point for content translation
+   - Note the content ID or use site root
+   - Verify access permissions to the content tree
+
+2. **Review Content Types**
+   - Identify page types that should be translated
+   - List block types used in translatable content
+   - Document any custom content types or properties
+
+### Step 4: Configure LILT Connector
+
+1. **Add Connector in LILT**
+   - Navigate to Settings → Connectors in LILT
+   - Select "Episerver" from the available connectors
+
+2. **Enter Configuration**
+   - Input all required parameters from previous steps
+   - Test the connection to ensure proper authentication
+
+3. **Validate Content Access**
+   - Run a test to verify content can be accessed
+   - Check that language configurations are correct
+
+## Advanced Configuration
+
+### Multi-Site Setup
+
+For organizations with multiple Episerver sites:
+
+```yaml
+sites:
+  corporate:
+    site_id: "site-001"
+    source_language: "en"
+    target_languages: ["sv", "no", "da"]
+    content_root_id: "1234"
+  product:
+    site_id: "site-002"
+    source_language: "en-US"
+    target_languages: ["de", "fr", "es"]
+    content_root_id: "5678"
+```
+
+### Content Type Mapping
+
+Configure specific handling for different content types:
+
+<ParamField path="content_type_settings" type="object" optional>
+  Custom configuration for specific Episerver content types
+</ParamField>
+
+### Property-Level Configuration
+
+<ParamField path="property_translation_rules" type="object" optional>
+  Rules for handling specific properties (translate, copy, ignore)
+</ParamField>
+
+<ParamField path="rich_text_settings" type="object" optional>
+  Configuration for handling rich text content and embedded media
+</ParamField>
+
+## Best Practices
+
+### Content Organization
+- Organize content in logical hierarchies for efficient translation
+- Use consistent naming conventions for content types and properties
+- Implement proper content versioning and approval workflows
+- Maintain clean content structures without unnecessary complexity
+
+### Translation Workflow
+- Set up staging environments for translation review
+- Use Episerver's workflow features for content approval
+- Implement proper content scheduling for translated releases
+- Test translated content in the context of the full site
+
+### SEO and URL Management
+- Plan URL structures for international sites
+- Implement proper hreflang tags for multilingual SEO
+- Use Episerver's URL rewriting for language-specific URLs
+- Maintain consistent navigation structures across languages
+
+### Performance Optimization
+- Use content filtering to process only necessary content
+- Implement efficient content caching strategies
+- Monitor API usage and rate limits
+- Optimize image and media handling for translated content
+
+## Troubleshooting
+
+### Common Issues
+
+**API Access Problems**
+- Verify Content Delivery API is enabled in Episerver
+- Check user permissions for API access
+- Confirm authentication credentials are correct
+- Test API endpoints independently
+
+**Content Access Issues**
+- Verify content root ID exists and is accessible
+- Check permissions for specified content types
+- Ensure language configurations are correct
+- Confirm content is not locked or being edited
+
+**Translation Processing Problems**
+- Validate content type configurations
+- Check that specified properties exist and are translatable
+- Verify rich text content is properly formatted
+- Ensure target languages are configured in Episerver
+
+### Error Messages
+
+| Error | Description | Solution |
+|-------|-------------|----------|
+| `APINotEnabled` | Content Delivery API is not enabled | Enable API in Episerver configuration |
+| `AuthenticationFailed` | Invalid credentials or permissions | Check username/password and API permissions |
+| `ContentNotFound` | Specified content ID doesn't exist | Verify content root ID and permissions |
+| `LanguageNotConfigured` | Target language not set up in Episerver | Configure language in site settings |
+| `PropertyNotFound` | Specified property doesn't exist on content type | Check property names and content type definitions |
+| `ContentLocked` | Content is locked for editing | Wait for content to be unlocked or contact content owner |
+
+### Performance Optimization
+
+- Use content filtering to reduce processing overhead
+- Implement appropriate caching strategies
+- Monitor Episerver server performance during translation
+- Optimize content queries and API calls
+- Use batch processing for large content volumes
+
+### Support Resources
+
+- Check Episerver application logs for detailed error information
+- Review Episerver documentation for API limitations
+- Monitor system performance and resource usage
+- Contact LILT support for connector-specific issues
+
+## FAQ
+
+**Q: Which versions of Episerver are supported?**
+A: The connector supports Episerver CMS 11 and later versions with Content Delivery API enabled.
+
+**Q: Can I translate specific content properties only?**
+A: Yes, you can configure which properties to include or exclude from translation using the property filtering options.
+
+**Q: How are rich text and HTML content handled?**
+A: The connector preserves HTML structure while translating text content, maintaining formatting and embedded elements.
+
+**Q: Can I maintain different URL structures for different languages?**
+A: Yes, the connector can work with Episerver's URL rewriting features to maintain language-specific URL patterns.
+
+**Q: What happens to content relationships and references?**
+A: The connector maintains content relationships and updates references to ensure translated content links work correctly.
+
+**Q: Can I set up automated publishing workflows?**
+A: Yes, you can configure the connector to automatically publish translated content or route it through Episerver's approval workflows.
+
+**Q: How are media files and images handled?**
+A: Media files are typically shared across languages, but alt text and descriptions can be translated as part of the content properties.
+
+**Q: Can I translate content blocks and shared content?**
+A: Yes, the connector can process both page content and reusable content blocks, maintaining their relationships across languages.

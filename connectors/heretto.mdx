@@ -1,0 +1,249 @@
+---
+title: "Heretto Connector"
+description: "Connect your Heretto DITA authoring platform to LILT for seamless technical documentation translation"
+---
+
+## Overview
+
+The Heretto connector enables you to sync and manage translation files between your Heretto DITA authoring environment and LILT platform. This connector provides automated translation workflows for your structured technical documentation, making it easy to manage multilingual DITA content while maintaining topic relationships and metadata.
+
+## Prerequisites
+
+Before setting up the Heretto connector, ensure you have:
+
+- Heretto account with API access
+- Admin or power user permissions in Heretto
+- DITA content organized in maps and topics
+- Files in supported DITA formats (see [supported file types](/guides/supported-formats))
+- Proper permissions to access and modify content repositories
+
+## Required Configuration Parameters
+
+### Authentication
+
+<ParamField path="heretto_api_token" type="string" required>
+  Your Heretto API token from the account settings
+</ParamField>
+
+<ParamField path="heretto_server_url" type="string" required>
+  Your Heretto server URL (e.g., `https://yourcompany.heretto.com`)
+</ParamField>
+
+<ParamField path="username" type="string" required>
+  Your Heretto username for authentication
+</ParamField>
+
+### Repository Configuration
+
+<ParamField path="repository_id" type="string" required>
+  The ID of the Heretto repository containing your DITA content
+</ParamField>
+
+<ParamField path="branch" type="string" required default="main">
+  The branch to sync content from (e.g., `main`, `develop`)
+</ParamField>
+
+<ParamField path="rclone_backend_path" type="string" required>
+  The folder path to import files from (e.g., `/content/topics/`)
+</ParamField>
+
+<ParamField path="rclone_export_backend_path" type="string" optional>
+  The folder path to export translated files to. If not specified, creates language-specific folders
+</ParamField>
+
+## Optional Configuration Parameters
+
+### Content Filtering
+
+<ParamField path="rclone_includes" type="array" optional>
+  List of glob patterns to include specific files (e.g., `["**/*.dita", "**/*.ditamap"]`)
+</ParamField>
+
+<ParamField path="rclone_excludes" type="array" optional>
+  List of glob patterns to exclude specific files from processing
+</ParamField>
+
+### DITA-Specific Settings
+
+<ParamField path="include_metadata" type="boolean" optional default="true">
+  Whether to include DITA metadata elements in translation
+</ParamField>
+
+<ParamField path="preserve_conrefs" type="boolean" optional default="true">
+  Whether to preserve content references (conrefs) during translation
+</ParamField>
+
+<ParamField path="translate_alt_text" type="boolean" optional default="true">
+  Whether to translate image alt text and descriptions
+</ParamField>
+
+### Advanced Settings
+
+<ParamField path="target_languages" type="array" optional>
+  List of target language codes for translation (e.g., `["de", "fr", "es"]`)
+</ParamField>
+
+<ParamField path="create_language_branches" type="boolean" optional default="false">
+  Whether to create separate branches for each target language
+</ParamField>
+
+## Setup Instructions
+
+### Step 1: Generate Heretto API Token
+
+1. **Access Account Settings**
+   - Log into your Heretto workspace
+   - Navigate to **User Profile** → **API Tokens**
+
+2. **Create New Token**
+   - Click **Generate New Token**
+   - Name: "LILT Translation Connector"
+   - Set appropriate permissions for content access
+   - Copy the generated token securely
+
+### Step 2: Get Repository Information
+
+1. **Find Repository ID**
+   - Go to **Repositories** in Heretto
+   - Select your content repository
+   - Copy the Repository ID from the URL or settings
+
+2. **Verify Branch Access**
+   - Ensure the target branch contains your DITA content
+   - Check that you have read/write permissions on the branch
+
+### Step 3: Configure LILT Connector
+
+1. **Add Connector in LILT**
+   - Navigate to Settings → Connectors in LILT
+   - Select "Heretto" from the available connectors
+
+2. **Enter Configuration**
+   - Input all required parameters from steps above
+   - Test the connection to ensure proper authentication
+
+3. **Set Up Content Paths**
+   - Configure source folder paths for DITA content
+   - Define export paths for translated content
+
+## Advanced Configuration
+
+### Multi-Repository Setup
+
+For organizations with multiple DITA repositories:
+
+```yaml
+repositories:
+  user_guides:
+    repository_id: "repo-12345"
+    branch: "main"
+    rclone_backend_path: "/guides/"
+  api_docs:
+    repository_id: "repo-67890"
+    branch: "develop"
+    rclone_backend_path: "/api-reference/"
+```
+
+### DITA Map Processing
+
+Configure how DITA maps and topic relationships are handled:
+
+<ParamField path="process_dita_maps" type="boolean" optional default="true">
+  Whether to process DITA map files for translation
+</ParamField>
+
+<ParamField path="maintain_topic_references" type="boolean" optional default="true">
+  Whether to maintain topic references and relationships in translated content
+</ParamField>
+
+### Conditional Text Handling
+
+<ParamField path="process_conditional_text" type="boolean" optional default="true">
+  Whether to include conditional text (filtered content) in translation
+</ParamField>
+
+<ParamField path="condition_filters" type="array" optional>
+  List of condition attributes to process (e.g., `["audience", "platform"]`)
+</ParamField>
+
+## Best Practices
+
+### Content Organization
+- Structure DITA content with clear topic hierarchies
+- Use consistent naming conventions for files and folders
+- Implement proper topic relationships and cross-references
+- Maintain clean separation between content and formatting
+
+### Translation Workflow
+- Review DITA maps before initiating translation
+- Ensure all referenced topics are included in the translation scope
+- Validate content references (conrefs) and key references
+- Test translated content with your DITA publishing pipeline
+
+### Version Control
+- Use Heretto's branching for managing translation versions
+- Tag release versions before translation
+- Maintain translation memory alignment with source updates
+- Document changes that affect translated content
+
+### Metadata Management
+- Preserve essential DITA metadata during translation
+- Translate user-facing metadata (titles, descriptions)
+- Maintain technical metadata (IDs, references, conditions)
+- Update language-specific attributes appropriately
+
+## Troubleshooting
+
+### Common Issues
+
+**Authentication Errors**
+- Verify API token is valid and not expired
+- Check user permissions in Heretto
+- Ensure server URL is correct and accessible
+
+**Content Sync Issues**
+- Confirm repository ID and branch are correct
+- Verify file paths exist in the specified repository
+- Check that DITA files are valid and well-formed
+
+**Reference Resolution Problems**
+- Validate conref targets exist and are accessible
+- Check key definition mappings in DITA maps
+- Ensure cross-references use correct scope and format
+
+### Error Messages
+
+| Error | Description | Solution |
+|-------|-------------|----------|
+| `InvalidAPIToken` | API token is invalid or expired | Regenerate token in Heretto account settings |
+| `RepositoryNotFound` | Repository ID is incorrect | Verify repository ID from Heretto interface |
+| `BranchNotFound` | Specified branch doesn't exist | Check branch name and create if necessary |
+| `InvalidDITAContent` | DITA files contain validation errors | Run DITA validation tools before translation |
+| `ConrefResolutionFailed` | Content reference cannot be resolved | Check conref targets and key definitions |
+
+### Support Resources
+
+- Validate DITA content using Heretto's built-in validator
+- Check Heretto system status and API availability
+- Review Heretto documentation for API limitations
+- Contact LILT support for connector-specific issues
+
+## FAQ
+
+**Q: Can I translate DITA maps and topics separately?**
+A: Yes, you can configure the connector to process maps and topics independently or together as a complete documentation set.
+
+**Q: How are DITA content references (conrefs) handled?**
+A: The connector can preserve conrefs during translation and ensure they resolve correctly in the target language content.
+
+**Q: What happens to DITA metadata during translation?**
+A: Essential metadata is preserved, while user-facing metadata like titles and descriptions can be translated based on your configuration.
+
+**Q: Can I maintain multiple language versions in the same repository?**
+A: Yes, you can configure language-specific folders or branches to organize translated content within the same repository.
+
+**Q: How does the connector handle DITA specializations?**
+A: The connector processes standard DITA elements and can handle common specializations. Custom specializations may require additional configuration.
+
+**Q: Can I translate only specific topics from a DITA map?**
+A: Yes, use file filtering options to specify which topics to include in the translation process.

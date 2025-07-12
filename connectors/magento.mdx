@@ -1,0 +1,489 @@
+---
+title: "Magento Connector"
+description: "Connect your Magento e-commerce store to LILT for seamless product catalog and content translation across multiple locales"
+---
+
+## Overview
+
+The LILT Magento connector is a PHP-based plugin that enables Magento e-commerce stores to integrate with LILT's translation platform. Supporting both Magento Open Source and Adobe Commerce, this connector provides automated workflows for translating product catalogs, category descriptions, CMS content, and other e-commerce materials across multiple store views and locales.
+
+## Prerequisites
+
+Before installing the Magento connector, ensure you have:
+
+- Magento 2.4.x installation (Open Source or Adobe Commerce)
+- Admin access to your Magento store
+- PHP version compatibility (see compatibility notes below)
+- Composer access or ability to manually install modules
+- Cron jobs enabled for queue processing
+- Database backup capabilities
+- LILT API token with appropriate permissions
+
+## Compatibility Requirements
+
+### PHP Version Considerations
+
+**Important**: The Magento connector has specific PHP compatibility requirements:
+
+- **PHP 8.1**: Fully supported and recommended
+- **PHP 8.2/8.3**: Limited compatibility - known issues exist
+- **Magento 2.4.7+**: While Magento recommends PHP 8.2/8.3, the LILT connector may experience compatibility issues
+
+**Known PHP 8.2/8.3 Issues**:
+- Dynamic property creation deprecation warnings
+- Potential functional limitations in newer PHP versions
+- Contact LILT support for updated compatibility information
+
+### System Requirements
+
+- **Magento**: 2.4.x (Open Source or Adobe Commerce)
+- **Database**: MySQL with queue table support
+- **Cron**: Enabled for automated queue processing
+- **File Permissions**: Write access to Magento installation directory
+- **Memory**: Sufficient PHP memory limit for content processing
+
+## Installation Instructions
+
+### Method 1: Composer Installation (Recommended)
+
+1. **Navigate to Magento Root Directory**
+   ```bash
+   cd /path/to/your/magento/installation
+   ```
+
+2. **Install via Composer**
+   ```bash
+   composer require lilt/magento2-module
+   ```
+
+3. **Enable the Module**
+   ```bash
+   php bin/magento module:enable Lilt_Magento
+   php bin/magento setup:upgrade
+   php bin/magento cache:clean
+   ```
+
+4. **Verify Installation**
+   ```bash
+   php bin/magento module:status Lilt_Magento
+   ```
+
+### Method 2: Manual Installation
+
+1. **Prepare for Installation**
+   ```bash
+   # Enable maintenance mode
+   php bin/magento maintenance:enable
+   
+   # Create backup
+   php bin/magento setup:backup --code --media --db
+   ```
+
+2. **Extract Module Files**
+   ```bash
+   cd <magento-installation-dir>
+   mkdir -p app/code
+   tar --directory app/code -xvzf <path-to-lilt-translator.tgz>
+   ```
+
+3. **Register the Extension**
+   ```bash
+   php bin/magento setup:upgrade
+   php bin/magento module:enable Choreo_Translation
+   php bin/magento cache:clean
+   php bin/magento module:status
+   ```
+
+4. **Disable Maintenance Mode**
+   ```bash
+   php bin/magento maintenance:disable
+   ```
+
+## Configuration Setup
+
+### UI Configuration
+
+1. **Access Admin Configuration**
+   - Navigate to **Magento Admin** → **LILT** → **Settings**
+
+2. **Configure API Authentication**
+   - In **Translator Activation** section
+   - Enter your LILT API Token in the **Activation Key** field
+   - Save configuration
+
+3. **Set Up Cron Polling**
+   - Configure **Cron Settings** for automated job checking
+   - Set appropriate polling frequency based on your workflow needs
+   - Typical intervals: 15 minutes to 2 hours
+
+4. **Configure Default Attributes**
+   - Define which product attributes should be translated
+   - Set up category and CMS content translation preferences
+   - Configure language and store view mappings
+
+### CLI Configuration
+
+For automated or bulk configuration:
+
+```bash
+# Set API Token
+bin/magento config:set lilt_module/api/access_token "your-lilt-api-token"
+
+# Enable Async Transfer for better performance
+bin/magento config:set lilt_module/orders/transfer_async 1
+
+# Enable Async Receive for scalability
+bin/magento config:set lilt_module/orders/publish_async 1
+
+# Clean cache after configuration
+bin/magento cache:clean
+```
+
+## Queue System Setup
+
+### Consumer Configuration
+
+The Magento connector relies on message queues for efficient processing:
+
+1. **Manual Consumer Execution**
+   ```bash
+   # Run consumers manually for testing
+   php bin/magento queue:consumers:start lilt.order.publish --max-messages 100 -vvv
+   ```
+
+2. **Background Consumer Setup**
+   ```bash
+   # Run consumers in background
+   nohup php bin/magento queue:consumers:start lilt.order.publish > /var/log/lilt_consumer.log 2>&1 &
+   ```
+
+3. **Supervisor Configuration** (Recommended for Production)
+   ```ini
+   [program:magento_lilt_consumer]
+   command=/usr/bin/php /path/to/magento/bin/magento queue:consumers:start lilt.order.publish
+   directory=/path/to/magento
+   autostart=true
+   autorestart=true
+   stderr_logfile=/var/log/lilt_consumer.err.log
+   stdout_logfile=/var/log/lilt_consumer.out.log
+   user=www-data
+   ```
+
+## Content Types and Translation Scope
+
+### Translatable Content
+
+**Products**:
+- Product names and titles
+- Short and long descriptions
+- Custom attributes and specifications
+- Meta titles and descriptions
+- URL keys (if configured)
+
+**Categories**:
+- Category names and descriptions
+- Meta information
+- Custom category attributes
+
+**CMS Content**:
+- CMS pages and content blocks
+- Static blocks and widgets
+- Custom page content
+
+**Store Configuration**:
+- Store view-specific configurations
+- Email templates
+- System messages and notifications
+
+### Multi-Store Architecture
+
+The connector supports Magento's multi-store architecture:
+
+- **Website Level**: Multiple websites with different domains
+- **Store Level**: Different stores within websites
+- **Store View Level**: Language/locale-specific views
+
+## Translation Workflow
+
+### Creating Translation Jobs
+
+1. **Job Setup**
+   - Navigate to **LILT** → **Translation Jobs** → **New Job**
+   - Select source and target store views/languages
+   - Choose content types to translate
+
+2. **Content Selection**
+   - **Products**: Select specific products or categories
+   - **Categories**: Choose category hierarchies
+   - **Pages/Blocks**: Select CMS content
+   - Use search and filtering for large catalogs
+
+3. **Translation Configuration**
+   - Choose translation type (Verified or Instant)
+   - Set delivery preferences
+   - Add reference materials or style guides
+   - Configure quality requirements
+
+4. **Job Submission**
+   - Review order details and content scope
+   - Submit job to LILT translation queue
+   - Monitor job status through admin interface
+
+### Job Status Management
+
+**Available Statuses**:
+- **Draft**: Job created but not yet submitted
+- **Sent**: Job submitted to LILT for processing
+- **In-progress**: Translation work is underway
+- **Delivered**: Translations completed and ready for review
+- **Complete**: Translations approved and published
+- **Needs Attention**: Manual review or action required
+
+### Content Delivery and Publishing
+
+1. **Automatic Delivery**
+   - Completed translations automatically populate target store views
+   - Content maintains formatting and structure
+   - Attributes and metadata are preserved
+
+2. **Review and Approval**
+   - Review translated content before publishing
+   - Make adjustments if needed
+   - Approve content for store view activation
+
+3. **Store View Activation**
+   - Activate translated store views for customers
+   - Test functionality and user experience
+   - Monitor for any display or formatting issues
+
+## Advanced Configuration
+
+### Language Memory Configuration
+
+```php
+// Configure translation memory mappings
+$config = [
+    'source_locale' => 'en_US',
+    'target_locales' => [
+        'es_ES' => 'spanish_store_view',
+        'fr_FR' => 'french_store_view',
+        'de_DE' => 'german_store_view'
+    ],
+    'memory_mapping' => [
+        'product_catalog' => 'ecommerce_tm',
+        'cms_content' => 'marketing_tm'
+    ]
+];
+```
+
+### Custom Attribute Mapping
+
+```php
+// Define which product attributes should be translated
+$translatable_attributes = [
+    'name',
+    'description', 
+    'short_description',
+    'meta_title',
+    'meta_description',
+    'custom_attribute_1',
+    'custom_attribute_2'
+];
+```
+
+### Reference Materials Integration
+
+```yaml
+# Configure reference materials for translators
+reference_materials:
+  - type: "brand_guidelines"
+    url: "https://drive.google.com/brand-guide"
+  - type: "product_catalog"
+    url: "https://company.com/catalog"
+  - type: "terminology"
+    url: "https://drive.google.com/termbase"
+```
+
+## Troubleshooting
+
+### Installation Issues
+
+**Error**: "Module not found" or "Class not found"
+- **Solution**: Verify Composer installation completed successfully
+- **Solution**: Check file permissions in app/code directory
+- **Solution**: Clear generated code: `php bin/magento setup:di:compile`
+
+**Error**: Database errors during setup:upgrade
+- **Solution**: Verify database user has CREATE and ALTER permissions
+- **Solution**: Check MySQL version compatibility
+- **Solution**: Restore from backup and retry installation
+
+### Configuration Problems
+
+**Issue**: API authentication fails
+- **Solution**: Verify LILT API token is valid and has proper permissions
+- **Solution**: Check network connectivity to LILT services
+- **Solution**: Confirm token hasn't expired or been revoked
+
+**Issue**: Cron jobs not processing
+- **Solution**: Verify Magento cron is enabled and running
+- **Solution**: Check cron schedule configuration
+- **Solution**: Monitor system cron logs for errors
+
+### Queue Processing Issues
+
+**Issue**: Consumer processes not starting
+- **Solution**: Verify queue consumers are enabled in deployment configuration
+- **Solution**: Check PHP memory limits and execution time
+- **Solution**: Monitor queue table for pending messages
+
+**Issue**: Jobs stuck in processing
+- **Solution**: Check consumer process status and restart if needed
+- **Solution**: Review error logs for queue processing issues
+- **Solution**: Verify LILT API connectivity and response times
+
+### Content Selection Problems
+
+**Known Issue**: Product selection interface limitations
+- **Problem**: Selections clear when navigating between pages
+- **Workaround**: Complete product selection in single session
+- **Problem**: Search requires exact matches
+- **Workaround**: Use SKU or precise product names
+
+**Known Issue**: Pages and Blocks not appearing
+- **Problem**: CMS content not visible in selection interface
+- **Solution**: Verify content is published and accessible
+- **Solution**: Check user permissions for CMS management
+
+### PHP Compatibility Issues
+
+**Issue**: Dynamic property deprecation warnings (PHP 8.2+)
+- **Solution**: Contact LILT support for updated module version
+- **Temporary**: Suppress warnings in PHP configuration
+- **Recommendation**: Use PHP 8.1 for stability
+
+## Best Practices
+
+### Pre-Installation
+
+- **Always backup** databases and code before installation
+- **Test in staging** environment before production deployment
+- **Verify dependencies** including PHP version and Magento compatibility
+- **Plan maintenance window** for installation and testing
+
+### Configuration Management
+
+- **Use environment-specific** configuration for different deployment stages
+- **Document custom attributes** and translation mappings
+- **Set up monitoring** for queue processing and job status
+- **Implement proper error logging** for troubleshooting
+
+### Content Organization
+
+- **Structure product catalogs** with translation in mind
+- **Use consistent attribute naming** across product categories
+- **Implement proper taxonomy** for categories and content
+- **Plan URL structure** for multi-locale SEO
+
+### Performance Optimization
+
+- **Configure appropriate polling intervals** to balance timeliness and server load
+- **Use async processing** for large translation jobs
+- **Monitor queue processing** performance and adjust resources as needed
+- **Implement caching strategies** for translated content
+
+### Quality Control
+
+- **Review translations** before publishing to store views
+- **Test user experience** in all target locales
+- **Verify product functionality** across languages
+- **Monitor customer feedback** for translation quality
+
+## Marketplace and Support
+
+### Adobe Commerce Marketplace
+
+The LILT Magento connector is available through:
+- **Magento Marketplace**: Official marketplace listing
+- **Adobe Commerce Store**: For Adobe Commerce customers
+- **Direct Installation**: Via Composer or manual download
+
+### Support Channels
+
+- **Technical Support**: Through your LILT Account Manager
+- **Documentation**: Available in LILT knowledge base
+- **Community**: Magento developer community forums
+- **Professional Services**: Available for custom implementations
+
+## Migration and Updates
+
+### Upgrading the Connector
+
+1. **Preparation**
+   ```bash
+   # Create backup
+   php bin/magento setup:backup --code --db
+   
+   # Enable maintenance mode
+   php bin/magento maintenance:enable
+   ```
+
+2. **Update Process**
+   ```bash
+   # Update via Composer
+   composer update lilt/magento2-module
+   
+   # Run upgrade scripts
+   php bin/magento setup:upgrade
+   php bin/magento setup:di:compile
+   php bin/magento cache:clean
+   ```
+
+3. **Post-Update Verification**
+   - Test core connector functionality
+   - Verify existing translations remain intact
+   - Check queue processing continues normally
+   - Validate admin interface accessibility
+
+### Data Migration
+
+When migrating between Magento versions:
+- **Export translation jobs** and status information
+- **Backup translation memories** and terminology
+- **Document custom configurations** for recreation
+- **Plan testing schedule** for all translated content
+
+## FAQ
+
+**Q: Can the connector translate content from third-party Magento plugins?**
+A: The connector focuses on core Magento content types. Third-party plugin content may require custom development.
+
+**Q: How does the connector handle product variants and configurable products?**
+A: Each product variant can be translated independently, maintaining the parent-child relationship structure.
+
+**Q: Can I translate only specific product attributes?**
+A: Yes, configure which attributes should be translated through the Default Attributes settings.
+
+**Q: What happens if a translation job fails or errors occur?**
+A: Jobs are marked with "Needs Attention" status and error details are available in Magento admin for review.
+
+**Q: Can I preview translations before publishing to store views?**
+A: Yes, review completed translations in the admin interface before approving for publication.
+
+**Q: How does the connector handle SEO elements like URLs and meta data?**
+A: URL keys and meta information can be translated, but consider SEO strategy for multilingual sites.
+
+**Q: Is the connector compatible with headless Magento implementations?**
+A: The connector works with standard Magento installations. Headless implementations may require API-based integration.
+
+**Q: Can I schedule translation jobs to run at specific times?**
+A: Jobs are submitted immediately but processing timing depends on LILT's service queue and your configured polling interval.
+
+## Additional Resources
+
+- [Magento DevDocs](https://devdocs.magento.com/) - Official Magento developer documentation
+- [Adobe Commerce Marketplace](https://marketplace.magento.com/) - Official extension marketplace
+- [LILT Supported File Formats](https://support.lilt.com/kb/supported-file-formats) - Compatible content types
+- Work with your LILT Production Strategist for workflow optimization
+- Contact your LILT Account Executive for enterprise features and custom integrations
+- Consult Magento solution partners for complex e-commerce implementations

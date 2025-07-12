@@ -1,0 +1,282 @@
+---
+title: "Contentstack Connector"
+description: "Connect your Contentstack CMS to LILT for seamless content translation and localization workflows"
+---
+
+## Overview
+
+The Contentstack connector enables you to translate and localize your Contentstack content directly within the Contentstack interface. This app-based connector provides automated translation workflows for your CMS content, making it easy to manage multilingual content and maintain consistency across language versions.
+
+## Prerequisites
+
+Before setting up the Contentstack connector, ensure you have:
+
+- A Contentstack account with appropriate permissions
+- Access to the Contentstack Developer Hub
+- LILT connector token provided by your Account Executive or Production Strategist
+- Contentstack stacks with target languages configured
+
+## Installation
+
+### Manual Installation Process
+
+1. **Access Developer Hub**
+   - Navigate to the Contentstack Developer Hub
+   - Log in with your Contentstack credentials
+
+2. **Create New App**
+   - Click **Create New App**
+   - Fill out the application details:
+     - App Name: "LILT Translation Connector"
+     - Description: "LILT translation integration for Contentstack"
+     - Category: Translation/Localization
+
+3. **Configure App Settings**
+   - Set **Custom Hosting URL** to: `https://contentstack-connector.lilt.com`
+   - Configure **OAuth Redirect URI** to: `https://contentstack-connector.lilt.com/oauth/callback`
+
+4. **Set Up UI Locations**
+   - Add **Full Page** location for the main connector interface
+   - Configure appropriate permissions and scopes
+
+5. **Install the App**
+   - Complete the installation process
+   - The LILT connector will appear in your Contentstack sidebar
+
+## Required Configuration Parameters
+
+### Authentication
+
+<ParamField path="lilt_connector_token" type="string" required>
+  Your LILT connector token provided by your Account Executive or Production Strategist
+</ParamField>
+
+<ParamField path="contentstack_management_token" type="string" required>
+  Contentstack Management Token with appropriate read/write permissions
+</ParamField>
+
+<ParamField path="contentstack_api_key" type="string" required>
+  Your Contentstack Stack API Key
+</ParamField>
+
+### Stack Configuration
+
+<ParamField path="source_environment" type="string" required>
+  The source environment in Contentstack (e.g., "master", "development")
+</ParamField>
+
+<ParamField path="target_environment" type="string" required>
+  The target environment where translated content will be published
+</ParamField>
+
+## Language Configuration
+
+### Setting Up Languages in Contentstack
+
+1. **Configure Stack Languages**
+   - Go to **Settings** → **Select Stack** → **Languages**
+   - Click **Add Language** for each target language
+   - Configure language codes and locale settings
+
+2. **Language Code Requirements**
+   - Use simple language codes for source language (e.g., `en` not `en-US`)
+   - Ensure target language codes match LILT's supported locales
+   - Configure fallback languages if needed
+
+### Content Entry Management
+
+1. **Working with Entries**
+   - Navigate to your content entries in Contentstack
+   - Use the language dropdown to switch between language versions
+   - Each language version maintains separate content versions
+
+## Usage Instructions
+
+### Submitting Content for Translation
+
+1. **Access the LILT Connector**
+   - Open your Contentstack stack
+   - Click on the LILT connector in the sidebar
+   - Authenticate with your LILT connector token
+
+2. **Select Content**
+   - Choose the entries you want to translate
+   - Select source and target languages
+   - Configure translation preferences (Instant vs. Verified)
+
+3. **Submit Translation Request**
+   - Review content selection and settings
+   - Submit the translation job
+   - Monitor progress through the connector interface
+
+### Importing Completed Translations
+
+1. **Check Translation Status**
+   - Use the connector interface to monitor job progress
+   - Receive notifications when translations are complete
+
+2. **Import Translations**
+   - Navigate to the target language entry
+   - Use the connector to import completed translations
+   - Review and approve content before publishing
+
+3. **Preview and Publish**
+   - Use Contentstack's preview function to review translations
+   - Check for character escaping and formatting issues
+   - Publish translated content to your target environment
+
+## Best Practices
+
+### Content Structure
+
+- Organize content types with clear field hierarchies
+- Use consistent naming conventions for translatable fields
+- Implement proper content modeling for multilingual workflows
+- Consider content relationships and references across languages
+
+### Translation Workflow
+
+- Establish clear approval processes for translated content
+- Use Contentstack's workflow features to manage translation states
+- Coordinate with your LILT Production Strategist for memory setup
+- Implement quality control checks before publishing
+
+### Performance Optimization
+
+- Batch related content for efficient translation processing
+- Use content filtering to focus on specific content types
+- Monitor API rate limits and usage patterns
+- Optimize content structure for translation efficiency
+
+### Security and Permissions
+
+- Use environment-specific tokens for different deployment stages
+- Implement proper user permissions for translation workflows
+- Regularly review and rotate API tokens
+- Monitor connector usage and access logs
+
+## Advanced Configuration
+
+### Environment Management
+
+Set up different environments for translation workflows:
+
+```yaml
+# Development Environment
+source_environment: "development"
+target_environment: "staging"
+
+# Production Environment
+source_environment: "master"
+target_environment: "production"
+```
+
+### Content Type Filtering
+
+Configure specific content types for translation:
+- Focus on high-priority content types first
+- Exclude system or technical content from translation
+- Use field-level filtering for partial content translation
+
+## Troubleshooting
+
+### Installation Issues
+
+**Issue**: App not appearing in Contentstack sidebar
+- **Solution**: Verify app installation completed successfully
+- **Solution**: Check that UI locations are configured correctly
+- **Solution**: Refresh your browser and clear cache
+
+**Issue**: OAuth authentication failures
+- **Solution**: Verify redirect URI is exactly `https://contentstack-connector.lilt.com/oauth/callback`
+- **Solution**: Check app permissions and scopes
+- **Solution**: Ensure app is published and active
+
+### Authentication Problems
+
+**Issue**: Connector token authentication fails
+- **Solution**: Verify token is entered correctly without extra spaces
+- **Solution**: Check token validity with your LILT Account Executive
+- **Solution**: Ensure token has appropriate permissions for your organization
+
+**Issue**: Contentstack API errors
+- **Solution**: Verify Management Token has read/write permissions
+- **Solution**: Check API Key corresponds to the correct stack
+- **Solution**: Review API rate limits and usage
+
+### Language Configuration Issues
+
+**Issue**: Source language errors
+- **Solution**: Use simple language codes (e.g., `en` instead of `en-US`)
+- **Solution**: Ensure source language is configured in your Contentstack stack
+- **Solution**: Verify language mapping between Contentstack and LILT
+
+**Issue**: Target language content not appearing
+- **Solution**: Confirm target languages are enabled in stack settings
+- **Solution**: Check that content entries exist for target languages
+- **Solution**: Verify environment configurations
+
+### Content Processing Issues
+
+**Issue**: Content not submitting for translation
+- **Solution**: Check content entry permissions and access
+- **Solution**: Verify content type compatibility with connector
+- **Solution**: Review field-level configurations and restrictions
+
+**Issue**: Translation import problems
+- **Solution**: Ensure target language entries exist in Contentstack
+- **Solution**: Check for content field mapping issues
+- **Solution**: Verify environment permissions for content updates
+
+### Performance Issues
+
+**Issue**: Slow connector response
+- **Solution**: Check Contentstack API rate limits and usage
+- **Solution**: Reduce batch size for content processing
+- **Solution**: Monitor network connectivity and API responses
+
+**Issue**: Character encoding problems
+- **Solution**: Review content encoding settings in Contentstack
+- **Solution**: Check field type configurations for text content
+- **Solution**: Verify proper escaping and unescaping of special characters
+
+## FAQ
+
+**Q: Is the LILT app available in the Contentstack marketplace?**
+A: Currently, the LILT connector requires manual installation through the Developer Hub. Marketplace availability is planned for future releases.
+
+**Q: Can I translate specific fields within content entries?**
+A: Yes, the connector supports field-level translation control, allowing you to select which fields should be translated.
+
+**Q: How do I handle content references and relationships?**
+A: Content relationships are preserved during translation. Ensure related content is also translated to maintain consistency.
+
+**Q: Can I use different environments for translation workflows?**
+A: Yes, you can configure separate source and target environments to support staging and production workflows.
+
+**Q: What content types are supported?**
+A: The connector supports all standard Contentstack content types including text, rich text, and structured content fields.
+
+**Q: How do I handle content approval workflows?**
+A: Use Contentstack's built-in workflow features combined with the connector's translation status tracking for comprehensive approval processes.
+
+**Q: Can I batch translate multiple entries at once?**
+A: Yes, the connector supports batch processing for efficient translation of multiple content entries simultaneously.
+
+**Q: What happens if content is updated during translation?**
+A: The connector handles content versioning. Updates to source content may require retranslation depending on your workflow configuration.
+
+## EMC-Based Architecture
+
+The Contentstack connector is built on LILT's Enterprise Management Console (EMC) architecture, providing:
+- Standardized connector interface and functionality
+- Consistent user experience across different CMSs
+- Enterprise-grade security and reliability
+- Advanced workflow management capabilities
+
+## Additional Resources
+
+- Contact your LILT Account Executive for connector token and setup assistance
+- Work with your LILT Production Strategist for workflow optimization
+- Review Contentstack documentation for advanced CMS configuration
+- Monitor connector performance through LILT's analytics dashboard

@@ -1,0 +1,270 @@
+---
+title: "Google Drive Connector"
+description: "Connect your Google Drive to LILT for seamless translation and localization workflows"
+---
+
+## Overview
+
+The Google Drive connector enables you to sync and manage translation files between your Google Drive and LILT platform. This connector provides automated translation workflows for your Google Drive content, making it easy to collaborate on multilingual projects within your existing Google Workspace environment.
+
+## Prerequisites
+
+Before setting up the Google Drive connector, ensure you have:
+
+- A Google Workspace account with admin privileges
+- Access to Google Cloud Console for creating service accounts
+- A Google Drive Shared Drive (Team Drive) for file organization
+- Files in supported formats (see [supported file types](/guides/supported-formats))
+
+## Required Configuration Parameters
+
+### Authentication
+
+<ParamField path="google_drive_client_id" type="string" required>
+  Your Google API Client ID from the Google Cloud Console
+</ParamField>
+
+<ParamField path="google_drive_client_secret" type="string" required>
+  Your Google API Client Secret from the Google Cloud Console
+</ParamField>
+
+<ParamField path="google_refresh_token" type="string" required>
+  OAuth 2.0 refresh token for ongoing access to your Google Drive
+</ParamField>
+
+### Drive Configuration
+
+<ParamField path="google_drive_team_drive_id" type="string" required>
+  The Team Drive ID where your translation files are stored
+</ParamField>
+
+<ParamField path="rclone_backend_path" type="string" required>
+  The full folder path from the root of the Shared Drive (e.g., `Customer Folder/Production/Lilt`)
+</ParamField>
+
+<ParamField path="rclone_export_backend_path" type="string" optional>
+  The folder path for exported translated files. If not specified, files are exported to the same location as import
+</ParamField>
+
+## Optional Configuration Parameters
+
+### Content Filtering
+
+<ParamField path="rclone_includes" type="array" optional>
+  List of glob patterns to include specific files (e.g., `["**/*.docx", "**/*.json"]`)
+</ParamField>
+
+<ParamField path="rclone_excludes" type="array" optional>
+  List of glob patterns to exclude specific files (e.g., `["**/temp/*", "**/*.tmp"]`)
+</ParamField>
+
+## Setup Instructions
+
+### Step 1: Create Google Cloud Project
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Enable the Google Drive API for your project
+4. Navigate to **APIs & Services** → **Credentials**
+
+### Step 2: Create OAuth 2.0 Credentials
+
+1. Click **Create Credentials** → **OAuth 2.0 Client ID**
+2. Configure the consent screen if prompted
+3. Select **Web application** as the application type
+4. Add authorized redirect URIs:
+   - `https://developers.google.com/oauthplayground`
+   - Any other URIs you need for testing
+5. Save the credentials and note down:
+   - **Client ID**
+   - **Client Secret**
+
+### Step 3: Create Service Account
+
+1. In the Google Cloud Console, go to **IAM & Admin** → **Service Accounts**
+2. Click **Create Service Account**
+3. Fill in the service account details
+4. Grant the service account **Content Manager** permissions
+5. Create and download a JSON key file (optional for advanced setups)
+
+### Step 4: Generate Refresh Token
+
+1. Visit the [OAuth 2.0 Playground](https://developers.google.com/oauthplayground)
+2. Click the settings gear icon and check **Use your own OAuth credentials**
+3. Enter your Client ID and Client Secret
+4. In the left panel, select **Drive API v3** and choose:
+   - `https://www.googleapis.com/auth/drive`
+5. Click **Authorize APIs** and complete the OAuth flow
+6. Click **Exchange authorization code for tokens**
+7. Copy the **Refresh Token** for your connector configuration
+
+### Step 5: Set Up Shared Drive
+
+1. Create a new Shared Drive in Google Drive or use an existing one
+2. Share the Shared Drive with your service account email
+3. Grant the service account **Content Manager** permissions
+4. Create the folder structure you want LILT to use
+5. Copy the Team Drive ID from the URL when viewing the Shared Drive
+
+### Step 6: Configure the Connector
+
+1. In LILT, navigate to **Connectors** → **New Connector**
+2. Select **Google Drive** from the connector list
+3. Fill in the configuration parameters:
+   - **Client ID**: From Step 2
+   - **Client Secret**: From Step 2
+   - **Refresh Token**: From Step 4
+   - **Team Drive ID**: From Step 5
+   - **Folder Path**: Full path from Shared Drive root
+
+### Step 7: Test the Connection
+
+1. Click **Validate** to test your configuration
+2. The connector will verify:
+   - Authentication credentials
+   - Drive access permissions
+   - Folder path validity
+
+## Advanced Configuration
+
+### File Filtering
+
+Control which files are processed:
+
+```yaml
+# Include only specific document types
+rclone_includes:
+  - "**/*.docx"
+  - "**/*.xlsx"
+  - "**/*.json"
+  - "**/*.xml"
+
+# Exclude temporary and system files
+rclone_excludes:
+  - "**/temp/*"
+  - "**/.DS_Store"
+  - "**/~$*"
+  - "**/*.tmp"
+```
+
+### Folder Organization
+
+Organize your content with clear folder structure:
+
+```
+Team Drive Root/
+├── Customer Folder/
+│   ├── Production/
+│   │   ├── Lilt/
+│   │   │   ├── Source/
+│   │   │   └── Translated/
+│   │   └── Archive/
+│   └── Review/
+└── Templates/
+```
+
+## Best Practices
+
+### File Organization
+
+- Use a consistent folder structure in your Shared Drive
+- Create separate folders for source and translated files
+- Use descriptive folder names that include project or language information
+- Implement an archive system for completed projects
+
+### Security
+
+- Use service accounts with minimal required permissions
+- Regularly review and rotate OAuth credentials
+- Enable two-factor authentication on Google accounts
+- Monitor access logs through Google Admin Console
+
+### Performance
+
+- Use include/exclude patterns to limit file scanning scope
+- Organize files in logical folder structures to improve sync performance
+- Consider file size limits when working with large documents
+- Use Google Drive's version control features for tracking changes
+
+### Collaboration
+
+- Set up proper sharing permissions for team members
+- Use Google Drive's commenting and suggestion features for review workflows
+- Implement naming conventions for files at different stages of translation
+- Consider using Google Drive's approval workflows for quality control
+
+## Troubleshooting
+
+### Authentication Issues
+
+**Error**: "Invalid credentials"
+- **Solution**: Verify your Client ID and Client Secret are correct
+- **Solution**: Ensure the OAuth consent screen is configured properly
+- **Solution**: Check that the Google Drive API is enabled in your project
+
+**Error**: "Refresh token expired"
+- **Solution**: Generate a new refresh token using the OAuth Playground
+- **Solution**: Ensure the refresh token was copied completely without truncation
+- **Solution**: Check that the OAuth application has the correct scopes
+
+### Drive Access Issues
+
+**Error**: "Drive not found"
+- **Solution**: Verify the Team Drive ID is correct
+- **Solution**: Ensure the service account has been granted access to the Shared Drive
+- **Solution**: Check that the Shared Drive hasn't been deleted or moved
+
+**Error**: "Insufficient permissions"
+- **Solution**: Grant the service account Content Manager permissions
+- **Solution**: Verify the service account email is shared with the correct Shared Drive
+- **Solution**: Check that the account has access to the specific folders in the path
+
+### File Processing Issues
+
+**Error**: "Folder path not found"
+- **Solution**: Verify the folder path exists and is spelled correctly
+- **Solution**: Ensure the path is relative to the Shared Drive root
+- **Solution**: Check that folders in the path haven't been moved or deleted
+
+**Issue**: Files not being imported
+- **Solution**: Check your include/exclude patterns are not too restrictive
+- **Solution**: Verify file formats are supported by LILT
+- **Solution**: Ensure files are not corrupted or empty
+
+### Performance Issues
+
+**Issue**: Slow synchronization
+- **Solution**: Use more specific include patterns to reduce scanning scope
+- **Solution**: Organize files in smaller, focused folders
+- **Solution**: Check Google Drive API quota limits and usage
+
+**Issue**: Large file processing problems
+- **Solution**: Consider file size limits for your content type
+- **Solution**: Break large files into smaller, manageable chunks
+- **Solution**: Monitor Google Drive storage limits and usage
+
+## FAQ
+
+**Q: Can I use a personal Google account instead of Google Workspace?**
+A: While technically possible, Google Workspace is recommended for better security, admin controls, and Shared Drive features.
+
+**Q: What's the difference between a regular folder and a Shared Drive?**
+A: Shared Drives provide better collaboration features, centralized ownership, and are recommended for team-based translation workflows.
+
+**Q: How do I find my Team Drive ID?**
+A: The Team Drive ID is visible in the URL when you're viewing the Shared Drive. It's the long string after `/folders/` in the URL.
+
+**Q: Can I connect multiple Google Drives?**
+A: Yes, you can set up multiple connectors for different Shared Drives or use different folder paths within the same Shared Drive.
+
+**Q: What file formats are supported?**
+A: The connector supports all file formats that LILT can process. See the [supported formats guide](/guides/supported-formats) for details.
+
+**Q: How often does the connector sync?**
+A: The sync frequency depends on your connector schedule configuration and can be set to run at regular intervals or triggered manually.
+
+**Q: Can I use this with Google Docs native format?**
+A: The connector works with uploaded files rather than native Google Docs format. Export Google Docs to supported formats like DOCX for translation.
+
+**Q: What happens if someone moves a file while it's being processed?**
+A: The connector may encounter errors if files are moved during processing. It's recommended to establish file handling procedures to avoid conflicts.

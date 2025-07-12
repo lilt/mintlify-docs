@@ -1,0 +1,309 @@
+---
+title: "Trados Enterprise Connector"
+description: "Connect your Trados Enterprise to LILT for seamless enterprise translation management workflows"
+---
+
+## Overview
+
+The Trados Enterprise connector enables you to sync and manage translation projects between your Trados Enterprise translation management system and LILT platform. This enterprise-grade connector provides automated translation workflows that leverage Trados Enterprise's project management capabilities while utilizing LILT's AI-powered translation technology for enhanced productivity and scalability.
+
+## Prerequisites
+
+Before setting up the Trados Enterprise connector, ensure you have:
+
+- Trados Enterprise installation with API access enabled
+- Enterprise Administrator or Project Manager role
+- Access to translation memories and terminology databases
+- Files in supported formats (see [supported file types](/guides/supported-formats))
+- Network connectivity to Trados Enterprise server infrastructure
+
+## Required Configuration Parameters
+
+### Authentication
+
+<ParamField path="trados_server_url" type="string" required>
+  Your Trados Enterprise server URL (e.g., `https://trados-enterprise.yourcompany.com`)
+</ParamField>
+
+<ParamField path="username" type="string" required>
+  Your Trados Enterprise username for authentication
+</ParamField>
+
+<ParamField path="password" type="string" required>
+  Your Trados Enterprise password (stored securely in LILT's secret management)
+</ParamField>
+
+<ParamField path="domain" type="string" optional>
+  Windows domain for authentication (if using domain authentication)
+</ParamField>
+
+### Project Configuration
+
+<ParamField path="organization_id" type="string" required>
+  Trados Enterprise organization ID for project creation
+</ParamField>
+
+<ParamField path="customer_id" type="string" optional>
+  Customer ID for organizing projects under specific clients
+</ParamField>
+
+<ParamField path="project_template_id" type="string" optional>
+  ID of the Trados Enterprise project template to use
+</ParamField>
+
+<ParamField path="source_language" type="string" required>
+  Source language code (e.g., `en-US`, `en-GB`)
+</ParamField>
+
+<ParamField path="target_languages" type="array" required>
+  Array of target language codes (e.g., `["de-DE", "fr-FR", "es-ES"]`)
+</ParamField>
+
+## Optional Configuration Parameters
+
+### Translation Memory Configuration
+
+<ParamField path="server_tm_ids" type="array" optional>
+  List of server-based translation memory IDs to use
+</ParamField>
+
+<ParamField path="tm_search_settings" type="object" optional>
+  Configuration for translation memory search parameters and penalties
+</ParamField>
+
+<ParamField path="termbase_ids" type="array" optional>
+  List of termbase IDs for terminology management
+</ParamField>
+
+### Workflow Settings
+
+<ParamField path="workflow_definition_id" type="string" optional>
+  ID of the workflow definition to apply to projects
+</ParamField>
+
+<ParamField path="auto_assign_vendors" type="boolean" optional default="false">
+  Whether to automatically assign vendors based on language pairs
+</ParamField>
+
+<ParamField path="enable_task_automation" type="boolean" optional default="true">
+  Whether to enable automated task progression
+</ParamField>
+
+### Quality Assurance
+
+<ParamField path="qa_model_id" type="string" optional>
+  ID of the QA model to use for quality checks
+</ParamField>
+
+<ParamField path="enable_translation_verification" type="boolean" optional default="true">
+  Whether to run translation verification checks
+</ParamField>
+
+<ParamField path="enable_terminology_verification" type="boolean" optional default="true">
+  Whether to run terminology verification against termbases
+</ParamField>
+
+### Advanced Settings
+
+<ParamField path="file_processing_settings" type="object" optional>
+  Custom settings for specific file type processing
+</ParamField>
+
+<ParamField path="pretranslate_settings" type="object" optional>
+  Configuration for automated pre-translation using TMs
+</ParamField>
+
+<ParamField path="analysis_settings" type="object" optional>
+  Settings for translation analysis and word count calculations
+</ParamField>
+
+## Setup Instructions
+
+### Step 1: Configure Trados Enterprise Server
+
+1. **Verify API Access**
+   - Ensure Trados Enterprise has web services enabled
+   - Confirm API endpoints are accessible
+   - Test server connectivity and response
+
+2. **Check User Permissions**
+   - Verify user has project creation permissions
+   - Confirm access to required translation memories
+   - Ensure termbase access is properly configured
+
+### Step 2: Gather System Information
+
+1. **Organization and Customer IDs**
+   - Navigate to **Administration** → **Organizations**
+   - Note the organization ID for your setup
+   - Identify customer IDs if using customer-based organization
+
+2. **Translation Memory Setup**
+   - Go to **Translation Memories** → **Server TMs**
+   - Identify relevant server TMs and note their IDs
+   - Verify language pair configurations
+
+3. **Termbase Configuration**
+   - Access **Terminology** → **Termbases**
+   - Identify relevant termbases and note their IDs
+   - Verify termbase structure and content
+
+### Step 3: Prepare Project Templates
+
+1. **Create Project Template**
+   - Navigate to **Project Templates**
+   - Create or modify a template for LILT integration
+   - Configure workflow, TM settings, and QA options
+   - Save and note the template ID
+
+### Step 4: Configure LILT Connector
+
+1. **Add Connector in LILT**
+   - Navigate to Settings → Connectors in LILT
+   - Select "Trados Enterprise" from the available connectors
+
+2. **Enter Configuration**
+   - Input all required parameters from previous steps
+   - Test the connection to ensure proper authentication
+
+3. **Validate Integration**
+   - Create a test project to verify functionality
+   - Check that TMs and termbases are accessible
+
+## Advanced Configuration
+
+### Enterprise Multi-Tenant Setup
+
+For organizations with multiple business units:
+
+```yaml
+business_units:
+  marketing:
+    organization_id: "org-001"
+    customer_id: "cust-marketing"
+    server_tm_ids: ["tm-marketing-001", "tm-brand-002"]
+  technical:
+    organization_id: "org-002"
+    customer_id: "cust-technical"
+    server_tm_ids: ["tm-technical-001", "tm-api-002"]
+```
+
+### Advanced Workflow Integration
+
+<ParamField path="workflow_mapping" type="object" optional>
+  Map LILT project stages to Trados Enterprise workflow phases
+</ParamField>
+
+<ParamField path="milestone_tracking" type="boolean" optional default="true">
+  Whether to track project milestones and deliverables
+</ParamField>
+
+### Custom Analysis Settings
+
+<ParamField path="word_count_method" type="string" optional default="source">
+  Method for word count calculation (`source`, `target`, `weighted`)
+</ParamField>
+
+<ParamField path="fuzzy_match_bands" type="array" optional>
+  Custom fuzzy match bands for analysis and pricing
+</ParamField>
+
+## Best Practices
+
+### Enterprise Project Management
+- Use consistent project naming conventions across the organization
+- Leverage customer hierarchies for project organization
+- Implement proper project templates for standardization
+- Set up automated project archiving policies
+
+### Translation Memory Strategy
+- Maintain enterprise-wide translation memory standards
+- Implement TM governance and quality control processes
+- Use appropriate TM search settings for different content types
+- Regular TM maintenance and cleanup procedures
+
+### Workflow Optimization
+- Design efficient enterprise workflows with clear approval stages
+- Implement proper vendor management and assignment rules
+- Use automated quality checks to reduce manual review time
+- Set up appropriate escalation procedures for exceptions
+
+### Security and Compliance
+- Implement proper access controls and user permissions
+- Use secure authentication methods (domain integration)
+- Maintain audit trails for compliance requirements
+- Regular security reviews and access audits
+
+## Troubleshooting
+
+### Common Issues
+
+**Server Connectivity Problems**
+- Check Trados Enterprise server status and availability
+- Verify network connectivity and firewall configurations
+- Confirm web services are properly configured and running
+- Test API endpoints independently
+
+**Authentication Failures**
+- Verify username and password are correct
+- Check domain configuration if using Windows authentication
+- Confirm user account is not locked or expired
+- Validate user permissions for required operations
+
+**Project Creation Issues**
+- Ensure organization and customer IDs are valid
+- Check that project template exists and is accessible
+- Verify translation memory and termbase permissions
+- Confirm workflow definition is properly configured
+
+### Error Messages
+
+| Error | Description | Solution |
+|-------|-------------|----------|
+| `ServerUnavailable` | Trados Enterprise server not accessible | Check server status and network connectivity |
+| `AuthenticationError` | Invalid credentials or permissions | Verify username, password, and domain settings |
+| `OrganizationNotFound` | Organization ID is invalid | Check organization configuration in Trados Enterprise |
+| `TMAccessDenied` | Translation memory access denied | Verify TM permissions and user access rights |
+| `WorkflowError` | Workflow definition cannot be applied | Check workflow configuration and dependencies |
+| `ProjectTemplateInvalid` | Project template has configuration errors | Review and fix project template settings |
+
+### Performance Optimization
+
+- Use appropriate TM search settings to balance quality and speed
+- Optimize file processing settings for large projects
+- Implement efficient project organization structures
+- Monitor server resource usage and capacity planning
+- Use batch processing for large translation volumes
+
+### Support Resources
+
+- Review Trados Enterprise server logs for detailed error information
+- Check system performance monitoring and alerts
+- Validate translation memory and termbase integrity
+- Contact LILT support for connector-specific issues
+
+## FAQ
+
+**Q: Which versions of Trados Enterprise are supported?**
+A: The connector supports Trados Enterprise 2019 and later versions with API access enabled.
+
+**Q: Can I use multiple translation memories for a single project?**
+A: Yes, you can configure multiple server TM IDs and set up cascading TM searches with appropriate penalty settings.
+
+**Q: How are Trados Enterprise workflows integrated with LILT?**
+A: The connector maps LILT translation stages to Trados Enterprise workflow phases, enabling seamless project progression.
+
+**Q: Can I maintain enterprise customer hierarchies?**
+A: Yes, the connector supports customer-based project organization and can maintain existing customer hierarchies.
+
+**Q: How are translation analyses handled between platforms?**
+A: The connector can leverage Trados Enterprise analysis capabilities and contribute translation statistics back to the system.
+
+**Q: What file types are supported for enterprise translation?**
+A: The connector supports all standard Trados Enterprise file types including complex formats and specialized document types.
+
+**Q: Can I set up automated vendor assignments?**
+A: Yes, the connector can work with Trados Enterprise vendor management to automatically assign translators based on language pairs and availability.
+
+**Q: How are large enterprise projects handled?**
+A: The connector supports batch processing and can handle large-scale enterprise translation projects with appropriate performance optimization.

@@ -35,7 +35,27 @@
           {
             "group": "Connectors",
             "pages": [
-              "connectors/s3"
+              "connectors/aws-workdocs",
+              "connectors/azure-blob",
+              "connectors/box",
+              "connectors/braze",
+              "connectors/contentstack",
+              "connectors/crowdin",
+              "connectors/episerver",
+              "connectors/figma",
+              "connectors/google-drive",
+              "connectors/heretto",
+              "connectors/kalcium",
+              "connectors/lokalise",
+              "connectors/magento",
+              "connectors/onedrive",
+              "connectors/phrase-tms",
+              "connectors/s3",
+              "connectors/sdl-tms",
+              "connectors/trados-enterprise",
+              "connectors/w",
+              "connectors/webflow",
+              "connectors/webflow-files"
             ]
           }
         ]

@@ -1,0 +1,292 @@
+---
+title: "W Connector"
+description: "Connect your W platform to LILT for seamless content translation and workflow integration"
+---
+
+## Overview
+
+The W connector enables you to sync and manage translation files between your W platform and LILT. This connector provides automated translation workflows for your content, making it easy to manage multilingual projects while maintaining your existing W platform structure and processes.
+
+## Prerequisites
+
+Before setting up the W connector, ensure you have:
+
+- W platform account with API access
+- Appropriate permissions for content management
+- Access to W platform content repositories
+- Files in supported formats (see [supported file types](/guides/supported-formats))
+- Network connectivity to W platform services
+
+## Required Configuration Parameters
+
+### Authentication
+
+<ParamField path="w_api_endpoint" type="string" required>
+  Your W platform API endpoint URL (e.g., `https://api.w-platform.com`)
+</ParamField>
+
+<ParamField path="api_key" type="string" required>
+  Your W platform API key for authentication
+</ParamField>
+
+<ParamField path="username" type="string" required>
+  Your W platform username
+</ParamField>
+
+<ParamField path="workspace_id" type="string" required>
+  W platform workspace ID for content access
+</ParamField>
+
+### Content Configuration
+
+<ParamField path="source_language" type="string" required>
+  Source language code (e.g., `en`, `en-US`)
+</ParamField>
+
+<ParamField path="target_languages" type="array" required>
+  Array of target language codes (e.g., `["de", "fr", "es"]`)
+</ParamField>
+
+<ParamField path="content_repository_id" type="string" required>
+  ID of the content repository to sync with LILT
+</ParamField>
+
+<ParamField path="rclone_backend_path" type="string" required>
+  The content path to import files from (e.g., `/content/source/`)
+</ParamField>
+
+<ParamField path="rclone_export_backend_path" type="string" optional>
+  The path to export translated files to. If not specified, creates language-specific folders
+</ParamField>
+
+## Optional Configuration Parameters
+
+### Content Filtering
+
+<ParamField path="rclone_includes" type="array" optional>
+  List of glob patterns to include specific files (e.g., `["**/*.json", "**/*.xml"]`)
+</ParamField>
+
+<ParamField path="rclone_excludes" type="array" optional>
+  List of glob patterns to exclude specific files from processing
+</ParamField>
+
+<ParamField path="content_types" type="array" optional>
+  Specific W platform content types to process
+</ParamField>
+
+### Workflow Settings
+
+<ParamField path="auto_sync" type="boolean" optional default="false">
+  Whether to automatically sync content changes from W platform
+</ParamField>
+
+<ParamField path="sync_frequency" type="string" optional default="daily">
+  Frequency for automatic syncing (`hourly`, `daily`, `weekly`)
+</ParamField>
+
+<ParamField path="notification_webhook" type="string" optional>
+  Webhook URL for receiving sync notifications
+</ParamField>
+
+### Advanced Settings
+
+<ParamField path="preserve_metadata" type="boolean" optional default="true">
+  Whether to preserve W platform metadata during translation
+</ParamField>
+
+<ParamField path="version_control" type="boolean" optional default="true">
+  Whether to maintain version control for translated content
+</ParamField>
+
+<ParamField path="custom_fields" type="array" optional>
+  List of custom W platform fields to include in translation
+</ParamField>
+
+## Setup Instructions
+
+### Step 1: Configure W Platform API Access
+
+1. **Generate API Key**
+   - Log into your W platform account
+   - Navigate to **Settings** → **API Management**
+   - Generate a new API key for LILT integration
+   - Copy the API key securely
+
+2. **Verify Permissions**
+   - Ensure your account has content management permissions
+   - Confirm access to the target workspace and repositories
+   - Test API connectivity using W platform's API tools
+
+### Step 2: Identify Content Structure
+
+1. **Locate Workspace**
+   - Navigate to your W platform workspace
+   - Note the workspace ID from the URL or settings
+   - Verify access to content repositories
+
+2. **Map Content Repositories**
+   - Identify repositories containing translatable content
+   - Note repository IDs and content structures
+   - Document content types and metadata requirements
+
+### Step 3: Configure Content Paths
+
+1. **Define Source Paths**
+   - Identify folder structures containing source content
+   - Map content hierarchies and organization
+   - Define which content types need translation
+
+2. **Plan Target Structure**
+   - Design folder structure for translated content
+   - Consider language-specific organization
+   - Plan for content versioning and updates
+
+### Step 4: Configure LILT Connector
+
+1. **Add Connector in LILT**
+   - Navigate to Settings → Connectors in LILT
+   - Select "W" from the available connectors
+
+2. **Enter Configuration**
+   - Input all required parameters from previous steps
+   - Test the connection to ensure proper authentication
+
+3. **Validate Content Access**
+   - Run a test sync to verify content accessibility
+   - Check that content filtering works as expected
+
+## Advanced Configuration
+
+### Multi-Workspace Setup
+
+For organizations with multiple W platform workspaces:
+
+```yaml
+workspaces:
+  marketing:
+    workspace_id: "ws-001"
+    content_repository_id: "repo-marketing"
+    rclone_backend_path: "/marketing-content/"
+  technical:
+    workspace_id: "ws-002"
+    content_repository_id: "repo-technical"
+    rclone_backend_path: "/technical-docs/"
+```
+
+### Content Type Mapping
+
+Configure specific handling for different W platform content types:
+
+<ParamField path="content_type_rules" type="object" optional>
+  Rules for processing specific W platform content types
+</ParamField>
+
+### Webhook Integration
+
+<ParamField path="webhook_events" type="array" optional>
+  List of W platform events to listen for (e.g., `["content.updated", "content.published"]`)
+</ParamField>
+
+<ParamField path="webhook_authentication" type="object" optional>
+  Authentication settings for webhook endpoints
+</ParamField>
+
+## Best Practices
+
+### Content Management
+- Organize content in logical hierarchies within W platform
+- Use consistent naming conventions for repositories and content
+- Implement proper content versioning strategies
+- Maintain clean metadata and tagging systems
+
+### Translation Workflow
+- Set up staging environments for translation review
+- Use W platform's workflow features for content approval
+- Implement proper content scheduling for releases
+- Monitor translation quality and consistency
+
+### API Usage Optimization
+- Monitor W platform API rate limits and usage
+- Implement efficient content filtering to reduce processing
+- Use batch operations where possible
+- Cache frequently accessed metadata
+
+### Version Control
+- Maintain proper version control for source and translated content
+- Use W platform's versioning features effectively
+- Document translation workflows and procedures
+- Implement rollback procedures for translation errors
+
+## Troubleshooting
+
+### Common Issues
+
+**API Authentication Problems**
+- Verify API key is valid and not expired
+- Check user permissions in W platform
+- Confirm workspace access and permissions
+- Test API connectivity independently
+
+**Content Access Issues**
+- Verify workspace ID and repository ID are correct
+- Check content path configurations
+- Ensure content exists at specified locations
+- Confirm content is not locked or restricted
+
+**Sync Problems**
+- Check network connectivity to W platform
+- Verify content filtering patterns are correct
+- Monitor for API rate limiting
+- Check for content format compatibility
+
+### Error Messages
+
+| Error | Description | Solution |
+|-------|-------------|----------|
+| `InvalidAPIKey` | API key is invalid or expired | Regenerate API key in W platform settings |
+| `WorkspaceNotFound` | Workspace ID is incorrect | Verify workspace ID from W platform |
+| `RepositoryNotFound` | Repository ID doesn't exist | Check repository configuration and permissions |
+| `ContentNotAccessible` | Content cannot be accessed | Verify permissions and content availability |
+| `RateLimitExceeded` | API rate limit exceeded | Implement rate limiting or contact W platform support |
+
+### Performance Optimization
+
+- Use efficient content filtering to reduce processing overhead
+- Implement appropriate caching strategies for metadata
+- Monitor W platform API usage and optimization
+- Use batch processing for large content volumes
+- Optimize content organization for efficient access
+
+### Support Resources
+
+- Check W platform status and service availability
+- Review W platform API documentation for updates
+- Monitor system logs for detailed error information
+- Contact LILT support for connector-specific issues
+
+## FAQ
+
+**Q: What types of content can be translated through the W connector?**
+A: The connector supports various W platform content types including documents, structured content, and metadata, depending on your W platform configuration.
+
+**Q: Can I translate content automatically when it's updated in W platform?**
+A: Yes, you can configure automatic syncing and webhook notifications to trigger translation workflows when content changes.
+
+**Q: How are content relationships maintained during translation?**
+A: The connector preserves W platform content relationships and references, ensuring translated content maintains proper linking and structure.
+
+**Q: Can I translate only specific content types or repositories?**
+A: Yes, you can configure content filtering to process only specific content types, repositories, or folder structures.
+
+**Q: What happens to W platform metadata during translation?**
+A: Metadata can be preserved, translated, or handled according to your configuration, with support for custom fields and properties.
+
+**Q: Can I maintain different content structures for different languages?**
+A: Yes, the connector supports flexible export path configuration to organize translated content according to your requirements.
+
+**Q: How are content versions handled during translation?**
+A: The connector can maintain version control for translated content, working with W platform's versioning system to track changes and updates.
+
+**Q: Can I set up approval workflows for translated content?**
+A: Yes, the connector can integrate with W platform's workflow features to route translated content through appropriate approval processes.

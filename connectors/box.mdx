@@ -1,0 +1,252 @@
+---
+title: "Box Connector"
+description: "Connect your Box account to LILT for seamless translation and localization workflows"
+---
+
+## Overview
+
+The Box connector enables you to sync and manage translation files between your Box storage and LILT platform. This connector provides automated translation workflows for your Box content, making it easy to collaborate on multilingual projects while maintaining your existing Box file structure.
+
+## Prerequisites
+
+Before setting up the Box connector, ensure you have:
+
+- A Box Enterprise account with admin privileges
+- Access to the Box Developer Console
+- Files in supported formats (see [supported file types](/guides/supported-formats))
+- Proper permissions to create and share folders in Box
+
+## Required Configuration Parameters
+
+### Authentication
+
+<ParamField path="client_id" type="string" required>
+  Your Box App Client ID from the Developer Console
+</ParamField>
+
+<ParamField path="client_secret" type="string" required>
+  Your Box App Client Secret from the Developer Console
+</ParamField>
+
+<ParamField path="enterprise_id" type="string" required>
+  Your Box Enterprise ID from the General Settings tab
+</ParamField>
+
+### Folder Configuration
+
+<ParamField path="rclone_backend_path" type="string" required>
+  The folder path to import files from (e.g., `/source-files/`)
+</ParamField>
+
+<ParamField path="rclone_export_backend_path" type="string" optional>
+  The folder path to export translated files to. If not specified, files are exported to the same location as import
+</ParamField>
+
+## Optional Configuration Parameters
+
+### Content Filtering
+
+<ParamField path="rclone_includes" type="array" optional>
+  List of glob patterns to include specific files (e.g., `["**/*.xliff", "**/*.json"]`)
+</ParamField>
+
+<ParamField path="rclone_excludes" type="array" optional>
+  List of glob patterns to exclude specific files (e.g., `["**/temp/*", "**/*.tmp"]`)
+</ParamField>
+
+### Advanced Settings
+
+<ParamField path="rclone_check_backend_path" type="boolean" optional>
+  When enabled, prevents creation of delivery folders if they don't exist. Useful for maintaining strict folder structures.
+</ParamField>
+
+<ParamField path="max_depth" type="number" optional>
+  Maximum folder depth to scan for files (default: unlimited)
+</ParamField>
+
+## Setup Instructions
+
+### Step 1: Create a Box Developer App
+
+1. Log into the [Box Developer Console](https://developer.box.com/)
+2. Click **Create New App**
+3. Choose **Custom App** and fill in the app information
+4. Select **Server Authentication (with Client Credentials Grant)** as the authentication method
+5. Click **Create App**
+
+### Step 2: Configure App Settings
+
+1. In the **Configuration** tab, copy the following values:
+   - **Client ID** 
+   - **Client Secret**
+2. In the **General Settings** tab, copy the **Enterprise ID**
+3. Under **Authorization**, click **Review and Submit** to enable the app
+4. You will receive an email confirmation when the app is authorized
+
+### Step 3: Share Box Folder
+
+1. Create or identify the root folder in Box that contains your translation files
+2. In the **General Settings** tab, copy the **Service Account ID** (email address)
+3. Share the root folder with this service account email address
+4. Ensure the service account has **Editor** permissions
+
+### Step 4: Configure the Connector
+
+1. In LILT, navigate to **Connectors** → **New Connector**
+2. Select **Box** from the connector list
+3. Fill in the configuration parameters:
+   - **Client ID**: From Step 2
+   - **Client Secret**: From Step 2
+   - **Enterprise ID**: From Step 2
+   - **Folder Path**: Path to your source files
+
+### Step 5: Test the Connection
+
+1. Click **Validate** to test your configuration
+2. The connector will verify:
+   - App authorization and permissions
+   - Folder access and sharing
+   - File scanning capabilities
+
+## Advanced Configuration
+
+### File Filtering
+
+Control which files are processed by the connector:
+
+```yaml
+# Include only specific file types
+rclone_includes:
+  - "**/*.xliff"
+  - "**/*.json"
+  - "**/*.properties"
+
+# Exclude system and temporary files
+rclone_excludes:
+  - "**/temp/*"
+  - "**/.DS_Store"
+  - "**/desktop.ini"
+```
+
+### Folder Management
+
+Prevent automatic folder creation for strict workflows:
+
+```yaml
+# Don't create delivery folders if they don't exist
+rclone_check_backend_path: true
+max_depth: 10
+```
+
+## Best Practices
+
+### File Organization
+
+- Use consistent folder structures in your Box account
+- Separate source and target files using different paths
+- Use descriptive folder names that include language codes
+- Organize files by project or content type for easier management
+
+### Security
+
+- Regularly review and rotate your Box app credentials
+- Use the minimum required permissions for the service account
+- Enable two-factor authentication on your Box Developer account
+- Monitor app usage through Box Admin Console
+
+### Performance
+
+- Use include/exclude patterns to limit file scanning scope
+- Consider folder depth limits for large Box accounts
+- Monitor connector performance and adjust polling frequency if needed
+- Use the `rclone_check_backend_path` setting for better control over folder creation
+
+### Content Management
+
+- Ensure files are properly formatted before placing in the source folder
+- Use consistent naming conventions for translated files
+- Consider using Box's version control features for tracking changes
+- Implement approval workflows before files are processed
+
+## Troubleshooting
+
+### Authentication Issues
+
+**Error**: "Authentication failed"
+- **Solution**: Verify your Client ID and Client Secret are correct
+- **Solution**: Ensure the Box app has been authorized and is active
+- **Solution**: Check that the Enterprise ID matches your Box account
+
+**Error**: "App not authorized"
+- **Solution**: Complete the authorization process in the Box Developer Console
+- **Solution**: Wait for the authorization email confirmation
+- **Solution**: Check that the app has the correct authentication method selected
+
+### Folder Access Issues
+
+**Error**: "Access denied to folder"
+- **Solution**: Verify the root folder is shared with the service account
+- **Solution**: Ensure the service account has Editor permissions
+- **Solution**: Check that the folder path is correct and accessible
+
+**Error**: "Folder not found"
+- **Solution**: Verify the folder path syntax (use forward slashes)
+- **Solution**: Ensure the folder exists and is not deleted
+- **Solution**: Check that the path is relative to the shared root folder
+
+### File Processing Issues
+
+**Error**: Files not being imported
+- **Solution**: Check your include/exclude patterns are not too restrictive
+- **Solution**: Verify file formats are supported by LILT
+- **Solution**: Ensure files are not corrupted or empty
+
+**Issue**: Files not delivered to correct location
+- **Solution**: Check the export path configuration
+- **Solution**: Verify target folders exist if `rclone_check_backend_path` is enabled
+- **Solution**: Review folder permissions and sharing settings
+
+### Performance Issues
+
+**Issue**: Slow file synchronization
+- **Solution**: Use more specific include patterns to reduce scanning scope
+- **Solution**: Implement folder depth limits with `max_depth` setting
+- **Solution**: Consider breaking large folders into smaller, organized structures
+
+**Issue**: Connector timeout errors
+- **Solution**: Reduce the number of files being processed simultaneously
+- **Solution**: Check Box API rate limits and usage
+- **Solution**: Implement content filtering to focus on relevant files
+
+### ICU and Content Formatting
+
+**Issue**: Text formatting issues in translated files
+- **Solution**: Review Box's ICU handling requirements for your content type
+- **Solution**: Implement proper content filtering for complex file structures
+- **Solution**: Use custom filters for specific content formatting needs
+
+## FAQ
+
+**Q: Can I use Box Personal or Business accounts?**
+A: No, the Box connector requires a Box Enterprise account with developer console access.
+
+**Q: How does the service account work?**
+A: The service account is an email address generated by Box for your app. You must share folders with this account for the connector to access them.
+
+**Q: What happens if I change my Box app settings?**
+A: If you modify the app configuration, you'll need to update the connector settings accordingly and re-authorize if necessary.
+
+**Q: Can I connect multiple Box folders?**
+A: Yes, you can configure multiple connectors for different Box folders, or use glob patterns to access multiple folders within a single connector.
+
+**Q: How do I handle file conflicts?**
+A: The connector will overwrite files by default. Use the `rclone_check_backend_path` setting to prevent folder creation and maintain stricter control.
+
+**Q: What file formats are supported?**
+A: The connector supports all file formats that LILT can process. See the [supported formats guide](/guides/supported-formats) for the complete list.
+
+**Q: How often does the connector sync?**
+A: The sync frequency depends on your connector schedule configuration and can be set to run at regular intervals or triggered manually.
+
+**Q: Can I use this for collaborative translation workflows?**
+A: Yes, the Box connector is designed for collaborative workflows where multiple team members can access and manage translation files through Box's native interface.

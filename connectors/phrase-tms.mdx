@@ -1,0 +1,279 @@
+---
+title: "Phrase TMS Connector"
+description: "Connect your Phrase TMS to LILT for seamless translation memory and workflow integration"
+---
+
+## Overview
+
+The Phrase TMS connector enables you to sync and manage translation projects between your Phrase Translation Management System and LILT platform. This connector provides automated translation workflows that leverage both platforms' strengths, allowing you to maintain consistency across translation memories while utilizing LILT's advanced AI-powered translation capabilities.
+
+## Prerequisites
+
+Before setting up the Phrase TMS connector, ensure you have:
+
+- Phrase TMS account with API access
+- Project Manager or Admin role in Phrase TMS
+- Access to create and manage projects in Phrase TMS
+- Files in supported formats (see [supported file types](/guides/supported-formats))
+- Proper permissions to access translation memories and termbases
+
+## Required Configuration Parameters
+
+### Authentication
+
+<ParamField path="phrase_api_token" type="string" required>
+  Your Phrase TMS API token from the account settings
+</ParamField>
+
+<ParamField path="phrase_server_url" type="string" required>
+  Your Phrase TMS server URL (e.g., `https://cloud.memsource.com` or your on-premise URL)
+</ParamField>
+
+<ParamField path="username" type="string" required>
+  Your Phrase TMS username for authentication
+</ParamField>
+
+### Project Configuration
+
+<ParamField path="project_template_id" type="string" optional>
+  ID of the Phrase TMS project template to use for new projects
+</ParamField>
+
+<ParamField path="source_language" type="string" required>
+  Source language code (e.g., `en`, `en-US`)
+</ParamField>
+
+<ParamField path="target_languages" type="array" required>
+  Array of target language codes (e.g., `["de", "fr", "es"]`)
+</ParamField>
+
+### Workflow Settings
+
+<ParamField path="workflow_step" type="string" optional default="translation">
+  Phrase TMS workflow step to sync with LILT (`translation`, `revision`, `approval`)
+</ParamField>
+
+<ParamField path="auto_assign_providers" type="boolean" optional default="false">
+  Whether to automatically assign translation providers in Phrase TMS
+</ParamField>
+
+## Optional Configuration Parameters
+
+### Translation Memory Integration
+
+<ParamField path="translation_memory_ids" type="array" optional>
+  List of Phrase TMS translation memory IDs to leverage during translation
+</ParamField>
+
+<ParamField path="termbase_ids" type="array" optional>
+  List of termbase IDs to use for terminology consistency
+</ParamField>
+
+<ParamField path="tm_match_threshold" type="number" optional default="70">
+  Minimum translation memory match percentage to consider (1-100)
+</ParamField>
+
+### Quality Settings
+
+<ParamField path="enable_qa_checks" type="boolean" optional default="true">
+  Whether to run Phrase TMS quality assurance checks
+</ParamField>
+
+<ParamField path="qa_profile_id" type="string" optional>
+  ID of the QA profile to use for quality checks
+</ParamField>
+
+### Advanced Settings
+
+<ParamField path="project_owner" type="string" optional>
+  Username of the project owner in Phrase TMS
+</ParamField>
+
+<ParamField path="due_date_offset" type="number" optional default="7">
+  Number of days to add to current date for project due date
+</ParamField>
+
+<ParamField path="preserve_project_structure" type="boolean" optional default="true">
+  Whether to maintain the original project folder structure
+</ParamField>
+
+## Setup Instructions
+
+### Step 1: Generate Phrase TMS API Token
+
+1. **Access User Settings**
+   - Log into your Phrase TMS workspace
+   - Navigate to **Setup** → **User Settings**
+
+2. **Create API Token**
+   - Go to **Access Tokens** tab
+   - Click **New** to create a token
+   - Name: "LILT Integration"
+   - Set appropriate scopes for project management
+   - Copy the generated token securely
+
+### Step 2: Configure Translation Resources
+
+1. **Set Up Translation Memories**
+   - Navigate to **Setup** → **Translation Memories**
+   - Note the IDs of relevant TMs for your projects
+   - Ensure proper access permissions
+
+2. **Configure Termbases**
+   - Go to **Setup** → **Term Bases**
+   - Identify relevant termbases for terminology consistency
+   - Record termbase IDs for configuration
+
+### Step 3: Prepare Project Template (Optional)
+
+1. **Create Project Template**
+   - Navigate to **Setup** → **Project Templates**
+   - Create a template with standard settings
+   - Configure workflow steps and quality profiles
+   - Note the template ID
+
+### Step 4: Configure LILT Connector
+
+1. **Add Connector in LILT**
+   - Navigate to Settings → Connectors in LILT
+   - Select "Phrase TMS" from the available connectors
+
+2. **Enter Configuration**
+   - Input all required parameters from steps above
+   - Test the connection to ensure proper authentication
+
+3. **Validate Integration**
+   - Create a test project to verify the connection
+   - Check that files sync correctly between platforms
+
+## Advanced Configuration
+
+### Multi-Domain Setup
+
+For organizations with multiple business domains:
+
+```yaml
+domains:
+  marketing:
+    project_template_id: "template-123"
+    translation_memory_ids: ["tm-456", "tm-789"]
+    termbase_ids: ["tb-101"]
+  technical:
+    project_template_id: "template-456"
+    translation_memory_ids: ["tm-012", "tm-345"]
+    termbase_ids: ["tb-202"]
+```
+
+### Workflow Integration
+
+Configure integration with Phrase TMS workflow steps:
+
+<ParamField path="workflow_mapping" type="object" optional>
+  Map LILT project stages to Phrase TMS workflow steps
+</ParamField>
+
+<ParamField path="status_sync" type="boolean" optional default="true">
+  Whether to sync project status between platforms
+</ParamField>
+
+### Quality Assurance Integration
+
+<ParamField path="lilt_qa_enabled" type="boolean" optional default="true">
+  Whether to run LILT's quality checks before sending to Phrase TMS
+</ParamField>
+
+<ParamField path="phrase_qa_required" type="boolean" optional default="false">
+  Whether Phrase TMS QA approval is required before delivery
+</ParamField>
+
+## Best Practices
+
+### Project Management
+- Use consistent project naming conventions across platforms
+- Leverage Phrase TMS project templates for standardization
+- Set realistic due dates accounting for both platforms' processing time
+- Monitor project progress in both systems
+
+### Translation Memory Strategy
+- Maintain clean, high-quality translation memories
+- Regular TM maintenance and cleanup
+- Align TM structure with your content domains
+- Use appropriate match thresholds for your content type
+
+### Quality Control
+- Implement multi-stage quality checks across both platforms
+- Use terminology management consistently
+- Set up proper reviewer assignments
+- Monitor translation consistency metrics
+
+### Workflow Optimization
+- Map workflow steps clearly between platforms
+- Automate status updates where possible
+- Set up notifications for workflow transitions
+- Document escalation procedures for issues
+
+## Troubleshooting
+
+### Common Issues
+
+**Authentication Errors**
+- Verify API token is valid and has sufficient permissions
+- Check that username and server URL are correct
+- Ensure token hasn't expired or been revoked
+
+**Project Sync Issues**
+- Confirm project template exists and is accessible
+- Verify target languages are configured in Phrase TMS
+- Check that translation memories and termbases are available
+
+**File Processing Problems**
+- Validate file formats are supported by both platforms
+- Check file size limitations
+- Ensure proper encoding for international characters
+
+### Error Messages
+
+| Error | Description | Solution |
+|-------|-------------|----------|
+| `InvalidAuthToken` | API token is invalid or expired | Regenerate token in Phrase TMS settings |
+| `ProjectTemplateNotFound` | Template ID doesn't exist | Verify template ID or create new template |
+| `InsufficientPermissions` | User lacks required permissions | Check user role and project access rights |
+| `LanguageNotSupported` | Target language not configured | Add language to Phrase TMS organization settings |
+| `TMNotAccessible` | Translation memory not available | Verify TM permissions and organization access |
+
+### Performance Optimization
+
+- Use project templates to reduce setup time
+- Leverage translation memory pre-translation
+- Optimize file segmentation for better processing
+- Monitor API rate limits and usage
+
+### Support Resources
+
+- Check Phrase TMS API documentation for rate limits
+- Review system status and maintenance schedules
+- Validate translation memory performance
+- Contact LILT support for connector-specific issues
+
+## FAQ
+
+**Q: Can I use multiple translation memories simultaneously?**
+A: Yes, you can configure multiple TM IDs and set priority orders for leveraging different translation memories.
+
+**Q: How are translation memory matches handled between platforms?**
+A: The connector can leverage Phrase TMS translation memories and also contribute back to them with new translations from LILT.
+
+**Q: What workflow steps in Phrase TMS work with this connector?**
+A: The connector primarily integrates with translation, revision, and approval workflow steps, with configurable mappings.
+
+**Q: Can I maintain project hierarchies across both platforms?**
+A: Yes, the connector can preserve project folder structures and hierarchies when syncing between platforms.
+
+**Q: How are termbases synchronized between platforms?**
+A: Termbases from Phrase TMS are used for consistency checks, and new terminology can be contributed back based on your configuration.
+
+**Q: What happens if a project fails quality checks in Phrase TMS?**
+A: The connector can be configured to handle QA failures by routing content back to LILT for revision or escalating to human reviewers.
+
+**Q: Can I run this connector with multiple Phrase TMS organizations?**
+A: Yes, you can set up separate connector instances for different Phrase TMS organizations or accounts.

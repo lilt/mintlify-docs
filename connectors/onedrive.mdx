@@ -1,0 +1,403 @@
+---
+title: "OneDrive Connector"
+description: "Connect your Microsoft OneDrive to LILT for seamless cloud-based file translation and content management"
+---
+
+## Overview
+
+The OneDrive connector enables you to translate and manage files stored in Microsoft OneDrive through LILT's translation services. Built on the reliable rclone framework with OAuth authentication, this connector provides automated workflows for importing content from OneDrive, processing it through LILT's translation pipeline, and delivering completed translations back to your OneDrive storage.
+
+## Prerequisites
+
+Before setting up the OneDrive connector, ensure you have:
+
+- A Microsoft OneDrive account (Business or Personal)
+- Admin access to your Azure Active Directory (for business accounts)
+- Ability to create Azure application registrations
+- Understanding of Microsoft Graph API permissions
+- LILT account with connector access enabled
+
+## Setup Instructions
+
+### Step 1: Create Azure Application Registration
+
+1. **Navigate to Azure Portal**
+   - Go to [Azure application registration](https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade)
+   - Click **New registration**
+
+2. **Configure Application Settings**
+   - **Name**: Enter a descriptive name (e.g., "LILT OneDrive Integration")
+   - **Supported account types**: Choose "Accounts in this organizational directory only (Single tenant)"
+   - **Redirect URI**: 
+     - Select **Web** platform
+     - Enter exactly: `http://localhost:53682` (must be typed, not copy/pasted)
+
+3. **Record Application Details**
+   - After registration, note the **Application (client) ID**
+   - Example: `136691f2-ddab-48a5-953f-9308e8b29be2`
+   - Save this ID securely for connector configuration
+
+### Step 2: Generate Client Secret
+
+1. **Access Certificates & Secrets**
+   - In your Azure application, go to **Manage** → **Certificates & secrets**
+   - Click **New client secret**
+
+2. **Create Secret**
+   - Provide a description (e.g., "LILT Connector Secret")
+   - Set appropriate expiration period (recommend 24 months maximum)
+   - Click **Add**
+
+3. **Record Secret Value**
+   - Copy the **Value** immediately (this won't be displayed again)
+   - Example: `fZ48Q~xxxxxxxxxxxx-xx`
+   - Store securely with the client ID
+
+### Step 3: Configure API Permissions
+
+1. **Access API Permissions**
+   - Go to **Manage** → **API permissions**
+   - Click **Add a permission** → **Microsoft Graph** → **Delegated permissions**
+
+2. **Required Permissions**
+   Add these specific permissions:
+   - `Files.Read` - Read user files
+   - `Files.Read.All` - Read all files that user can access
+   - `Files.ReadWrite` - Read and write user files
+   - `Files.ReadWrite.All` - Read and write all files that user can access
+   - `offline_access` - Maintain access to data you have given it access to
+   - `User.Read` - Sign in and read user profile
+   - `Sites.Read.All` - Read items in all site collections
+
+3. **Grant Admin Consent**
+   - Click **Grant admin consent for [Your Organization]**
+   - Confirm consent for all permissions
+
+### Step 4: OAuth Token Generation
+
+#### Using LILT Connector Builder (Recommended)
+
+1. **Access Connector Builder**
+   - Navigate to LILT's Connector Builder interface
+   - Select **OneDrive** as connector type
+   - Follow OAuth authentication flow
+
+2. **Complete OAuth Flow**
+   - Enter your Azure application Client ID and Client Secret
+   - Authorize access through Microsoft's OAuth flow
+   - Connector Builder automatically handles token generation and storage
+
+#### Manual OAuth Process (Advanced)
+
+If using manual setup, follow this OAuth 2.0 flow:
+
+1. **Authorization URL**
+   ```
+   https://login.microsoftonline.com/common/oauth2/v2.0/authorize?
+   client_id={client_id}&
+   scope=files.read files.read.all files.readwrite files.readwrite.all offline_access sites.read.all user.read&
+   response_type=code&
+   redirect_uri=http://localhost:53682
+   ```
+
+2. **Token Exchange**
+   POST to `https://login.microsoftonline.com/common/oauth2/token`:
+   ```
+   Content-Type: application/x-www-form-urlencoded
+
+   client_id={client_id}&
+   redirect_uri=http://localhost:53682&
+   client_secret={client_secret}&
+   code={authorization_code}&
+   grant_type=authorization_code
+   ```
+
+3. **Extract Tokens**
+   - Save `refresh_token` for connector configuration
+   - `access_token` is used for immediate API access
+   - `expires_in` indicates token lifetime
+
+## Required Configuration Parameters
+
+### Authentication
+
+<ParamField path="onedrive_client_id" type="string" required>
+  Your Azure application's Client ID from the application registration
+</ParamField>
+
+<ParamField path="onedrive_client_secret" type="string" required>
+  Your Azure application's Client Secret value
+</ParamField>
+
+<ParamField path="onedrive_refresh_token" type="string" required>
+  OAuth refresh token obtained through the authentication flow
+</ParamField>
+
+### Drive Configuration
+
+<ParamField path="onedrive_drive_type" type="string" required>
+  Specify the type of OneDrive account ("business" or "personal")
+</ParamField>
+
+<ParamField path="source_folder" type="string" optional>
+  Specific folder path in OneDrive to monitor for translation content
+</ParamField>
+
+<ParamField path="target_folder" type="string" optional>
+  Destination folder for translated content delivery
+</ParamField>
+
+## Translation Workflow
+
+### Automated File Processing
+
+1. **Content Detection**
+   - Connector periodically scans configured OneDrive folders
+   - Only processes [supported file formats](https://support.lilt.com/kb/supported-file-formats)
+   - Automatically creates translation projects for new content
+
+2. **File Import**
+   - Source files are imported from OneDrive folders
+   - Original file structure and metadata are preserved
+   - Content is routed to appropriate translation memory based on language detection
+
+3. **Translation Processing**
+   - Content is processed through LILT's translation pipeline
+   - File formatting and structure are maintained during translation
+   - Progress can be monitored through LILT's project dashboard
+
+4. **Content Delivery**
+   - Completed translations are delivered back to designated OneDrive folders
+   - Original folder structure is preserved in target location
+   - Delivery notifications are sent when translations are complete
+
+### File Organization Best Practices
+
+**Source Folder Structure:**
+```
+OneDrive/
+├── Translation Source/
+│   ├── English/
+│   │   ├── documents/
+│   │   ├── presentations/
+│   │   └── spreadsheets/
+│   └── staging/
+└── Translation Output/
+    ├── Spanish/
+    ├── French/
+    └── German/
+```
+
+**Recommended Naming Conventions:**
+- Use clear, descriptive folder names
+- Organize by language and content type
+- Implement version control through folder structure
+- Separate source and target content clearly
+
+## Advanced Features
+
+### Microsoft SSO Integration
+
+For enterprise customers with Microsoft SSO:
+
+1. **Enhanced Security**
+   - Leverage existing Azure AD authentication
+   - Inherit organizational security policies
+   - Simplified user access management
+
+2. **Single Sign-On Flow**
+   - Users authenticate once through organizational SSO
+   - Automatic access to configured OneDrive connectors
+   - Reduced password management overhead
+
+### Business vs Personal Account Support
+
+**Business Accounts (OneDrive for Business):**
+- Integration with SharePoint Online
+- Advanced admin controls and policies
+- Support for large file sizes and storage quotas
+- Integration with Microsoft 365 security features
+
+**Personal Accounts (OneDrive Personal):**
+- Individual user account support
+- Standard OneDrive storage limits
+- Personal file organization and sharing
+
+### Multi-Folder Configuration
+
+```yaml
+# Monitor multiple source folders
+source_folders:
+  - "Translation Projects/Active"
+  - "Content Updates/Pending"
+  - "Marketing Materials/Review"
+
+# Organize outputs by language
+target_folders:
+  spanish: "Translations/Spanish"
+  french: "Translations/French"
+  german: "Translations/German"
+```
+
+## Troubleshooting
+
+### Authentication Issues
+
+**Error**: "Invalid client credentials"
+- **Solution**: Verify Client ID and Client Secret are correct
+- **Solution**: Check that the Azure application registration is active
+- **Solution**: Ensure client secret hasn't expired
+
+**Error**: "Insufficient permissions"
+- **Solution**: Verify all required Microsoft Graph permissions are granted
+- **Solution**: Confirm admin consent has been provided for all permissions
+- **Solution**: Check that the user account has access to the specified OneDrive content
+
+**Error**: "Token expired" or "Authentication failed"
+- **Solution**: Refresh the OAuth tokens using the stored refresh token
+- **Solution**: Re-run the OAuth authentication flow if refresh token is invalid
+- **Solution**: Verify the redirect URI matches exactly in Azure application settings
+
+### File Access Issues
+
+**Issue**: Cannot access files in specific folders
+- **Solution**: Check that the authenticated user has read/write access to target folders
+- **Solution**: Verify folder paths are correct and exist in OneDrive
+- **Solution**: Confirm files are not locked or in use by other applications
+
+**Issue**: Files not being processed
+- **Solution**: Verify files are in [supported formats](https://support.lilt.com/kb/supported-file-formats)
+- **Solution**: Check file size limits and storage quotas
+- **Solution**: Ensure files are not corrupted or password-protected
+
+### Connection and Sync Issues
+
+**Issue**: Connector not detecting new files
+- **Solution**: Check connector polling frequency settings
+- **Solution**: Verify OneDrive sync status and connectivity
+- **Solution**: Confirm folder monitoring configuration is correct
+
+**Issue**: Slow file synchronization
+- **Solution**: Check network connectivity and bandwidth
+- **Solution**: Verify Microsoft Graph API rate limits
+- **Solution**: Optimize folder structure to reduce scanning overhead
+
+### Permission and Security Issues
+
+**Issue**: "Access denied" errors
+- **Solution**: Review Microsoft Graph API permissions and scopes
+- **Solution**: Check organizational security policies and conditional access rules
+- **Solution**: Verify the service account has appropriate OneDrive access
+
+**Issue**: Organizational restrictions blocking access
+- **Solution**: Work with IT administrator to configure appropriate access policies
+- **Solution**: Request allowlisting for LILT's service endpoints
+- **Solution**: Configure application as trusted within organizational tenant
+
+## Best Practices
+
+### Security and Compliance
+
+- Use organization-specific Azure applications instead of shared credentials
+- Implement least-privilege access principles for API permissions
+- Regular review and rotation of client secrets
+- Monitor access logs and authentication events
+
+### File Organization
+
+- Implement clear folder hierarchies for source and target content
+- Use consistent naming conventions across projects
+- Separate work-in-progress from completed translations
+- Maintain backup copies of critical translation content
+
+### Performance Optimization
+
+- Organize files in logical folder structures to optimize scanning
+- Use appropriate polling frequencies based on content update patterns
+- Monitor Microsoft Graph API usage and stay within rate limits
+- Batch related content updates for efficient processing
+
+### Integration Management
+
+- Coordinate OneDrive connector setup with SharePoint connectors for comprehensive coverage
+- Align authentication methods with organizational SSO policies
+- Plan connector updates and maintenance during low-activity periods
+- Document configuration details for team knowledge sharing
+
+## FAQ
+
+**Q: Can I use the same Azure application for multiple LILT connectors?**
+A: Yes, but ensure the application has all required permissions for each connector type and manage refresh tokens appropriately.
+
+**Q: What's the difference between OneDrive Business and Personal account support?**
+A: Business accounts integrate with organizational Azure AD and SharePoint, while Personal accounts are individual Microsoft accounts with standard OneDrive features.
+
+**Q: How often does the connector check for new files?**
+A: Polling frequency is configurable during setup. Typical intervals range from 15 minutes to several hours based on your workflow requirements.
+
+**Q: Can I organize translations into language-specific folders?**
+A: Yes, use target folder configuration to automatically route translated content to language-specific destinations.
+
+**Q: What happens if my client secret expires?**
+A: Generate a new client secret in Azure and update the connector configuration. The refresh token remains valid during this process.
+
+**Q: Can I restrict which files get translated?**
+A: Yes, use folder-based organization and file type filters to control which content is processed for translation.
+
+**Q: How do I handle large files or folders with many files?**
+A: The connector handles large content volumes efficiently, but consider organizing content across multiple folders for optimal performance.
+
+**Q: Is real-time translation available?**
+A: The connector operates on a polling schedule rather than real-time monitoring. For urgent requests, coordinate directly with your LILT team.
+
+## Microsoft SSO Integration
+
+### Setup for Enterprise Customers
+
+1. **Prerequisites**
+   - Existing Microsoft SSO implementation
+   - Azure AD administrative access
+   - LILT enterprise account with SSO support
+
+2. **Configuration Steps**
+   - Integrate OneDrive application with existing SSO policies
+   - Configure conditional access rules for LILT services
+   - Set up automatic token refresh through SSO integration
+
+3. **Benefits**
+   - Simplified user authentication experience
+   - Centralized access control and monitoring
+   - Enhanced security through organizational policies
+   - Reduced password management overhead
+
+## Migration and Deployment
+
+### From Manual Setup to Connector Builder
+
+If migrating from manual OneDrive setup:
+
+1. **Assessment**
+   - Document current authentication method and tokens
+   - Identify all configured folders and file paths
+   - Review current translation workflows and dependencies
+
+2. **Migration Process**
+   - Set up new connector using Connector Builder OAuth flow
+   - Test functionality with subset of content before full migration
+   - Update documentation and user procedures
+   - Decommission old manual configuration after verification
+
+3. **Verification**
+   - Confirm all folders and files remain accessible
+   - Test translation workflow end-to-end
+   - Verify delivery paths and notification systems
+   - Update monitoring and alerting configurations
+
+## Additional Resources
+
+- [Microsoft Graph API Documentation](https://docs.microsoft.com/en-us/graph/)
+- [Azure Application Registration Guide](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app)
+- [OneDrive API Reference](https://docs.microsoft.com/en-us/onedrive/developer/)
+- [LILT Supported File Formats](https://support.lilt.com/kb/supported-file-formats)
+- Work with your LILT Production Strategist for workflow optimization
+- Contact your LILT Account Executive for enterprise features and Microsoft SSO integration

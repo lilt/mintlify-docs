@@ -1,0 +1,219 @@
+---
+title: "Figma Connector"
+description: "Connect your Figma designs to LILT for seamless UI/UX translation and localization workflows"
+---
+
+## Overview
+
+The Figma connector enables you to translate and localize your Figma designs directly within the Figma interface. This plugin-based connector provides automated translation workflows for UI text, making it easy to create multilingual design prototypes and maintain consistency across language versions.
+
+## Prerequisites
+
+Before setting up the Figma connector, ensure you have:
+
+- A Figma account with access to the designs you want to translate
+- LILT API token provided by your Account Executive or Production Strategist
+- Access to install plugins from the Figma Community
+- Figma files with text content ready for translation
+
+## Installation
+
+### Step 1: Install the LILT Figma Plugin
+
+1. Open your Figma file
+2. Navigate to **Plugins** → **Browse plugins in Community**
+3. Search for "LILT Figma Connector" or visit the [direct plugin link](https://www.figma.com/community/plugin/1034960139249970136/lilt-figma-connector)
+4. Click **Install** to add the plugin to your Figma account
+
+### Step 2: Configure Plugin Settings
+
+1. In your Figma file, go to **Plugins** → **LILT ↔ Figma Connector Plugin**
+2. Click **Settings** in the plugin interface
+3. Configure the following settings:
+   - **LILT Token**: Enter your API token (provided by your LILT team)
+   - **LILT API URL**: Enter `https://lilt.com/2`
+4. Click **Save** to store your configuration
+
+## Required Configuration Parameters
+
+### Authentication
+
+<ParamField path="lilt_token" type="string" required>
+  Your LILT API token for authentication (provided by your Account Executive)
+</ParamField>
+
+<ParamField path="lilt_api_url" type="string" required>
+  The LILT API endpoint URL (typically `https://lilt.com/2`)
+</ParamField>
+
+### Translation Settings
+
+<ParamField path="source_language" type="string" required>
+  The source language code for your design content
+</ParamField>
+
+<ParamField path="target_language" type="string" required>
+  The target language code for translation
+</ParamField>
+
+<ParamField path="translation_type" type="string" required>
+  Choose between "Instant" (AI-powered) or "Verified" (human-reviewed) translation
+</ParamField>
+
+## Optional Configuration Parameters
+
+### Memory Settings
+
+<ParamField path="memory_selection" type="string" optional>
+  Select a specific translation memory to use (coordinate with your LILT Production Strategist)
+</ParamField>
+
+### Advanced Options
+
+<ParamField path="create_target_pages" type="boolean" optional>
+  Automatically create target language pages after submitting translation requests
+</ParamField>
+
+## Usage Instructions
+
+### Preparing Your Figma Files
+
+1. **Create Language Versions**: For each target language, create a duplicate of your source page
+2. **Naming Convention**: Include the target language in the page name (e.g., "Homepage - ES", "Homepage - FR")
+3. **Organize Pages**: Group related language versions together for easier management
+
+### Submitting Translation Requests
+
+1. **Select Target Page**: Choose the target language page you want to translate
+2. **Launch Plugin**: Go to **Plugins** → **LILT ↔ Figma Connector Plugin**
+3. **Configure Translation**:
+   - Select **Translation Type**: Instant or Verified
+   - Choose **Source Language**: Language of your original design
+   - Choose **Target Language**: Language for translation
+   - Select **Memory** (optional): Choose a specific translation memory if configured
+4. **Submit Request**: Click **Submit** to send content for translation
+
+### Importing Completed Translations
+
+1. **Check Status**: Click the **Status** icon in the plugin's bottom bar
+2. **Monitor Progress**: Translation jobs will show as "In Progress" until completed
+3. **Import Translations**: 
+   - When status changes to "Delivered", navigate to the target language page
+   - Click on the **Orders** tab in the plugin
+   - Select delivered orders and click **Import**
+   - The plugin will automatically update text elements with translations
+
+## Best Practices
+
+### Design Preparation
+
+- Use consistent text styles and components across your designs
+- Organize text elements in logical groups for easier translation management
+- Consider text expansion when designing UI elements (some languages require more space)
+- Use descriptive names for text layers to provide context for translators
+
+### File Organization
+
+- Create a clear folder structure for different language versions
+- Use consistent naming conventions across all language variants
+- Group related pages together (e.g., all onboarding screens for each language)
+- Maintain a master source file that serves as the reference for all translations
+
+### Translation Workflow
+
+- Start with high-priority or frequently updated content
+- Use Instant translation for rapid prototyping and Verified for final designs
+- Coordinate with your LILT Production Strategist for memory setup and optimization
+- Review translations in context within your design layouts
+
+### Quality Control
+
+- Review translated text for proper fit within UI elements
+- Check for text truncation or overflow issues
+- Verify that translated content maintains the intended user experience
+- Test interactive prototypes with translated content
+
+## Advanced Features
+
+### Memory Management
+
+Work with your LILT Production Strategist to:
+- Set up project-specific translation memories
+- Maintain consistency across different design projects
+- Leverage previously translated content for efficiency
+
+### Batch Processing
+
+For large design systems:
+- Process multiple pages or components simultaneously
+- Use consistent translation settings across related content
+- Coordinate translation timing with design development cycles
+
+## Troubleshooting
+
+### Plugin Issues
+
+**Issue**: Plugin not loading or appearing in Figma
+- **Solution**: Refresh your browser and try reloading the plugin
+- **Solution**: Check that you're logged into the correct Figma account
+- **Solution**: Verify plugin installation in your Figma Community plugins
+
+**Issue**: Authentication errors
+- **Solution**: Verify your LILT token is entered correctly without extra spaces
+- **Solution**: Check that the API URL is exactly `https://lilt.com/2`
+- **Solution**: Contact your LILT team to verify token validity
+
+### Translation Issues
+
+**Issue**: Content not submitting for translation
+- **Solution**: Ensure you have text elements selected in your design
+- **Solution**: Check that source and target languages are different
+- **Solution**: Verify you have the necessary permissions for the Figma file
+
+**Issue**: Translations not importing correctly
+- **Solution**: Ensure you're on the correct target language page
+- **Solution**: Check that the translation job status shows as "Delivered"
+- **Solution**: Verify that text elements exist and are editable
+
+### Performance Issues
+
+**Issue**: Plugin running slowly
+- **Solution**: Close other Figma plugins that might be running
+- **Solution**: Reduce the number of text elements being processed at once
+- **Solution**: Check your internet connection stability
+
+## FAQ
+
+**Q: Can I translate components and design systems?**
+A: Yes, the plugin works with components, text styles, and design system elements. Changes to master components will reflect in all instances.
+
+**Q: How do I handle text that doesn't fit after translation?**
+A: Review designs after translation import and adjust text box sizes, font sizes, or layout as needed. Consider text expansion during initial design.
+
+**Q: Can I use the plugin for right-to-left languages?**
+A: Yes, but you may need to manually adjust text alignment and layout direction in Figma after importing translations.
+
+**Q: What file formats work with the Figma connector?**
+A: The connector works directly with Figma files and text elements. It doesn't require file export/import.
+
+**Q: How do I track translation progress?**
+A: Use the Status feature in the plugin to monitor job progress. You can also coordinate with your LILT Production Strategist for project updates.
+
+**Q: Can I translate prototype interactions and micro-copy?**
+A: Yes, any text element in your Figma file can be translated, including button labels, tooltips, and interaction text.
+
+**Q: Is there a limit to how much content I can translate?**
+A: Limits depend on your LILT account configuration. Contact your Account Executive for details about your specific limits.
+
+**Q: How do I maintain consistency across different design files?**
+A: Use translation memories and coordinate with your LILT Production Strategist to maintain terminology consistency across projects.
+
+## Marketplace Integration
+
+The LILT Figma Connector is available directly from the [Figma Community](https://www.figma.com/community/plugin/1034960139249970136/lilt-figma-connector). You can install and start translating your designs immediately without leaving the Figma interface.
+
+## Additional Resources
+
+- [LILT Support Documentation](https://support.lilt.com/hc/en-us/articles/4407545041815-Figma-)
+- [Figma Community Plugin Page](https://www.figma.com/community/plugin/1034960139249970136/lilt-figma-connector)
+- Contact your LILT Account Executive for advanced configuration and support

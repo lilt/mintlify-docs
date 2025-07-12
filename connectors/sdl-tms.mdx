@@ -1,0 +1,289 @@
+---
+title: "SDL TMS Connector"
+description: "Connect your SDL Trados Studio/GroupShare TMS to LILT for seamless translation workflow integration"
+---
+
+## Overview
+
+The SDL TMS connector enables you to sync and manage translation projects between your SDL Translation Management System (Trados Studio/GroupShare) and LILT platform. This connector provides automated translation workflows that leverage SDL's translation memories and terminology while utilizing LILT's AI-powered translation capabilities for enhanced productivity and quality.
+
+## Prerequisites
+
+Before setting up the SDL TMS connector, ensure you have:
+
+- SDL Trados Studio or SDL GroupShare with API access
+- Project Manager or Admin role in SDL TMS
+- Access to translation memories and termbases
+- Files in supported formats (see [supported file types](/guides/supported-formats))
+- Network connectivity to SDL server infrastructure
+
+## Required Configuration Parameters
+
+### Authentication
+
+<ParamField path="sdl_server_url" type="string" required>
+  Your SDL TMS server URL (e.g., `https://your-server.sdltms.com` or GroupShare URL)
+</ParamField>
+
+<ParamField path="username" type="string" required>
+  Your SDL TMS username for authentication
+</ParamField>
+
+<ParamField path="password" type="string" required>
+  Your SDL TMS password (stored securely in LILT's secret management)
+</ParamField>
+
+<ParamField path="organization_path" type="string" required>
+  SDL TMS organization path (e.g., `/Default Organization/`)
+</ParamField>
+
+### Project Configuration
+
+<ParamField path="project_template_id" type="string" optional>
+  ID of the SDL TMS project template to use for new projects
+</ParamField>
+
+<ParamField path="source_language" type="string" required>
+  Source language code (e.g., `en-US`, `en-GB`)
+</ParamField>
+
+<ParamField path="target_languages" type="array" required>
+  Array of target language codes (e.g., `["de-DE", "fr-FR", "es-ES"]`)
+</ParamField>
+
+### Translation Memory Settings
+
+<ParamField path="translation_memory_path" type="string" required>
+  Path to the primary translation memory in SDL TMS
+</ParamField>
+
+<ParamField path="termbase_path" type="string" optional>
+  Path to the termbase for terminology management
+</ParamField>
+
+## Optional Configuration Parameters
+
+### Workflow Configuration
+
+<ParamField path="workflow_template" type="string" optional>
+  SDL TMS workflow template to apply to projects
+</ParamField>
+
+<ParamField path="auto_assign_translators" type="boolean" optional default="false">
+  Whether to automatically assign translators based on SDL TMS settings
+</ParamField>
+
+<ParamField path="task_sequence" type="array" optional>
+  Sequence of SDL TMS tasks to create (e.g., `["Translate", "Review", "Approve"]`)
+</ParamField>
+
+### Quality Settings
+
+<ParamField path="enable_qa_checks" type="boolean" optional default="true">
+  Whether to run SDL TMS quality assurance checks
+</ParamField>
+
+<ParamField path="qa_profile" type="string" optional>
+  Name of the QA profile to use for quality checks
+</ParamField>
+
+<ParamField path="tm_penalty_profile" type="string" optional>
+  Translation memory penalty profile for match scoring
+</ParamField>
+
+### Advanced Settings
+
+<ParamField path="file_type_settings" type="object" optional>
+  Custom file type configuration for specific formats
+</ParamField>
+
+<ParamField path="pretranslate_threshold" type="number" optional default="75">
+  Minimum TM match percentage for pre-translation (1-100)
+</ParamField>
+
+<ParamField path="leverage_autopropagation" type="boolean" optional default="true">
+  Whether to use SDL's auto-propagation of repetitions
+</ParamField>
+
+## Setup Instructions
+
+### Step 1: Configure SDL TMS Access
+
+1. **Verify API Access**
+   - Ensure your SDL TMS installation has API access enabled
+   - Confirm your user account has sufficient permissions
+   - Test connectivity to the SDL TMS server
+
+2. **Gather Organization Information**
+   - Navigate to **Administration** → **Organizations**
+   - Note the full organization path for your setup
+   - Verify permissions for project creation
+
+### Step 2: Prepare Translation Resources
+
+1. **Set Up Translation Memory**
+   - Create or identify the primary translation memory
+   - Ensure it contains relevant language pairs
+   - Note the TM server path for configuration
+
+2. **Configure Termbase (Optional)**
+   - Set up or identify relevant termbases
+   - Ensure terminology is properly structured
+   - Note the termbase server path
+
+### Step 3: Create Project Template (Recommended)
+
+1. **Design Project Template**
+   - Navigate to **Project Templates** in SDL TMS
+   - Create a template with standard workflow settings
+   - Configure file type settings and QA profiles
+   - Save and note the template ID
+
+### Step 4: Configure LILT Connector
+
+1. **Add Connector in LILT**
+   - Navigate to Settings → Connectors in LILT
+   - Select "SDL TMS" from the available connectors
+
+2. **Enter Configuration**
+   - Input all required parameters from steps above
+   - Test the connection to ensure proper authentication
+
+3. **Validate Setup**
+   - Create a test project to verify integration
+   - Check that translation memories are accessible
+
+## Advanced Configuration
+
+### Multi-Server Setup
+
+For organizations with multiple SDL TMS servers:
+
+```yaml
+environments:
+  production:
+    sdl_server_url: "https://prod.sdltms.com"
+    organization_path: "/Production Org/"
+    translation_memory_path: "/TMs/Production/"
+  development:
+    sdl_server_url: "https://dev.sdltms.com"
+    organization_path: "/Development Org/"
+    translation_memory_path: "/TMs/Development/"
+```
+
+### Custom File Type Configuration
+
+Configure specific settings for different file types:
+
+<ParamField path="filetype_configurations" type="object" optional>
+  Custom configuration for specific file types and their processing rules
+</ParamField>
+
+### Workflow Automation
+
+<ParamField path="auto_progress_tasks" type="boolean" optional default="false">
+  Whether to automatically progress through workflow tasks
+</ParamField>
+
+<ParamField path="notification_settings" type="object" optional>
+  Email notification settings for workflow transitions
+</ParamField>
+
+## Best Practices
+
+### Translation Memory Management
+- Maintain clean, high-quality translation memories
+- Use appropriate TM penalty profiles for different content types
+- Regularly update and maintain translation memories
+- Implement proper TM backup and versioning strategies
+
+### Project Organization
+- Use consistent project naming conventions
+- Leverage project templates for standardization
+- Organize projects by client, domain, or content type
+- Set realistic deadlines accounting for workflow complexity
+
+### Quality Assurance
+- Configure appropriate QA profiles for your content
+- Use termbase consistency checks
+- Implement multi-stage review processes
+- Monitor translation quality metrics
+
+### Workflow Optimization
+- Design efficient workflow templates
+- Automate repetitive tasks where possible
+- Use proper task sequencing and dependencies
+- Set up appropriate user assignments and permissions
+
+## Troubleshooting
+
+### Common Issues
+
+**Connection Problems**
+- Verify SDL TMS server is accessible and running
+- Check network connectivity and firewall settings
+- Confirm API services are enabled on the server
+- Validate user credentials and permissions
+
+**Translation Memory Issues**
+- Ensure TM server is running and accessible
+- Check TM file permissions and organization access
+- Verify language pair configuration in TM
+- Test TM connectivity independently
+
+**Project Creation Failures**
+- Confirm project template exists and is accessible
+- Check organization path is correct
+- Verify user has project creation permissions
+- Ensure target languages are properly configured
+
+### Error Messages
+
+| Error | Description | Solution |
+|-------|-------------|----------|
+| `ServerNotReachable` | Cannot connect to SDL TMS server | Check server URL and network connectivity |
+| `AuthenticationFailed` | Invalid credentials | Verify username and password |
+| `OrganizationNotFound` | Organization path is incorrect | Check organization structure in SDL TMS |
+| `TMNotAccessible` | Translation memory cannot be accessed | Verify TM path and permissions |
+| `WorkflowTemplateError` | Workflow template cannot be applied | Check template exists and is valid |
+
+### Performance Optimization
+
+- Use efficient TM search settings
+- Optimize file type configurations
+- Leverage pre-translation appropriately
+- Monitor server resource usage
+- Implement proper caching strategies
+
+### Support Resources
+
+- Check SDL TMS server logs for detailed error information
+- Review SDL documentation for API limitations
+- Monitor system performance and resource usage
+- Contact LILT support for connector-specific issues
+
+## FAQ
+
+**Q: Which versions of SDL TMS are supported?**
+A: The connector supports SDL Trados Studio 2019 and later, as well as SDL GroupShare 2017 and later versions.
+
+**Q: Can I use multiple translation memories simultaneously?**
+A: Yes, you can configure multiple TM paths and set up cascading TM searches for optimal leverage.
+
+**Q: How are SDL TMS workflows integrated with LILT?**
+A: The connector can map LILT translation stages to SDL TMS workflow tasks, enabling seamless project progression.
+
+**Q: What file types are supported for processing?**
+A: The connector supports all standard SDL TMS file types including Office documents, XML, HTML, and specialized formats.
+
+**Q: Can I maintain project hierarchies in SDL TMS?**
+A: Yes, the connector preserves project organization and can create projects within existing folder structures.
+
+**Q: How are translation memories updated with new content?**
+A: New translations from LILT can be automatically added to SDL translation memories based on your configuration.
+
+**Q: What happens if the SDL TMS server is temporarily unavailable?**
+A: The connector includes retry logic and can queue operations until the server becomes available again.
+
+**Q: Can I run parallel translation projects across both platforms?**
+A: Yes, the connector supports concurrent projects and can manage multiple translation workflows simultaneously.

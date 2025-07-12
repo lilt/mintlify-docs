@@ -1,0 +1,291 @@
+---
+title: "Lokalise Connector"
+description: "Connect your Lokalise projects to LILT for seamless localization and translation management workflows"
+---
+
+## Overview
+
+The Lokalise connector enables you to integrate your Lokalise localization management platform with LILT's translation services. This connector provides automated workflows for translating your app and web content, allowing you to leverage LILT's AI-powered and human translation services directly within your Lokalise projects.
+
+## Prerequisites
+
+Before setting up the Lokalise connector, ensure you have:
+
+- A Lokalise account with appropriate project permissions
+- Admin access to invite contributors to your Lokalise projects
+- Ability to generate API tokens in your Lokalise account
+- Projects with content ready for translation
+
+## Setup Instructions
+
+### Step 1: Invite LILT as a Contributor
+
+1. **Access Project Settings**
+   - Navigate to your Lokalise project
+   - Go to **Project Settings** → **Contributors**
+
+2. **Invite LILT Contributor**
+   - Click **Invite Contributors**
+   - Enter the email: `production@lilt.com`
+   - Grant **Admin** permissions (required for API access)
+   - Send the invitation
+
+3. **Confirm Contributor Access**
+   - Wait for LILT to accept the invitation
+   - Verify that production@lilt.com appears in your contributors list
+
+### Step 2: Generate API Token
+
+1. **Navigate to Personal Profile**
+   - Go to **Account** → **Personal Profile**
+   - Select **API Tokens** from the menu
+
+2. **Create New Token**
+   - Click **Generate a new token**
+   - Provide a descriptive name (e.g., "LILT Integration Token")
+   - Configure appropriate permissions:
+     - Read access to projects and translations
+     - Write access for translation updates
+     - Task management permissions
+
+3. **Save Token Securely**
+   - Copy the generated token immediately
+   - Store it securely for connector configuration
+   - Note: The token won't be displayed again
+
+### Step 3: Configure Translation Tasks
+
+1. **Create Translation Tasks**
+   - In your Lokalise project, create translation tasks
+   - Assign tasks to the LILT contributor
+   - Specify source and target languages
+   - Set task priorities and deadlines
+
+2. **Configure Task Settings**
+   - Define which keys/strings should be translated
+   - Set up task-specific instructions or context
+   - Configure review and approval workflows
+
+## Required Configuration Parameters
+
+### Authentication
+
+<ParamField path="lokalise_api_token" type="string" required>
+  Your Lokalise API token with appropriate read/write permissions
+</ParamField>
+
+<ParamField path="project_id" type="string" required>
+  The Lokalise project ID where translation tasks are managed
+</ParamField>
+
+### Task Configuration
+
+<ParamField path="contributor_email" type="string" required>
+  The LILT contributor email address (production@lilt.com)
+</ParamField>
+
+<ParamField path="source_language" type="string" required>
+  Source language code for translation tasks
+</ParamField>
+
+<ParamField path="target_languages" type="array" required>
+  Array of target language codes for translation
+</ParamField>
+
+## Optional Configuration Parameters
+
+### Workflow Settings
+
+<ParamField path="auto_assign_tasks" type="boolean" optional>
+  Automatically assign new translation tasks to LILT contributor
+</ParamField>
+
+<ParamField path="translation_memory_sync" type="boolean" optional>
+  Enable bi-directional translation memory synchronization
+</ParamField>
+
+<ParamField path="quality_threshold" type="string" optional>
+  Quality level requirement ("instant" or "verified")
+</ParamField>
+
+### Content Filtering
+
+<ParamField path="key_filters" type="array" optional>
+  Filter specific keys or key patterns for translation
+</ParamField>
+
+<ParamField path="tag_filters" type="array" optional>
+  Filter content based on Lokalise tags
+</ParamField>
+
+## Translation Memory Synchronization
+
+### How TM Sync Works
+
+The Lokalise connector supports bidirectional translation memory synchronization:
+
+1. **LILT to Lokalise**: Completed translations from LILT are automatically synced to your Lokalise project
+2. **Lokalise to LILT**: Translation updates made in Lokalise are captured and sent to LILT's translation memory
+3. **Continuous Learning**: The system improves translation consistency over time
+
+### TM Sync Configuration
+
+```yaml
+# Enable TM synchronization
+translation_memory_sync: true
+
+# Sync frequency (every 30 minutes)
+sync_interval: "30min"
+
+# Priority handling
+newer_always_wins: true
+```
+
+### Verification Process
+
+To verify TM sync is working:
+
+1. **Edit a Translation**: Modify a target translation in Lokalise
+2. **Wait for Batch**: Changes are queued and processed every 30 minutes
+3. **Check LILT**: Verify the updated translation appears in the corresponding LILT data source
+4. **Timestamp Priority**: Newer translations automatically take priority
+
+## Best Practices
+
+### Project Organization
+
+- Use consistent naming conventions for Lokalise projects
+- Organize keys with clear hierarchies and namespaces
+- Implement proper tagging for content categorization
+- Set up appropriate branching strategies for different release cycles
+
+### Task Management
+
+- Create focused translation tasks rather than large bulk assignments
+- Provide clear context and instructions for translators
+- Set realistic deadlines that account for quality requirements
+- Use Lokalise's task templates for consistency
+
+### Quality Control
+
+- Implement review workflows before final approval
+- Use Lokalise's screenshot and context features for visual references
+- Set up automated quality checks and validation rules
+- Coordinate with LILT Production Strategists for optimal quality settings
+
+### Performance Optimization
+
+- Batch related content updates for efficient processing
+- Use Lokalise's API rate limiting to avoid throttling
+- Monitor translation memory hit rates and effectiveness
+- Optimize key filtering to focus on high-priority content
+
+## Advanced Features
+
+### Automated Workflows
+
+Set up automated workflows that:
+- Trigger translation tasks when new content is added
+- Automatically assign tasks to LILT based on language pairs
+- Send notifications when translations are completed
+- Update translation status across connected systems
+
+### Multi-Project Management
+
+For organizations with multiple Lokalise projects:
+- Configure separate connectors for each project
+- Use consistent contributor and permission settings
+- Implement cross-project translation memory sharing
+- Coordinate release schedules across projects
+
+## Troubleshooting
+
+### Authentication Issues
+
+**Error**: "Invalid API token"
+- **Solution**: Verify the token was copied correctly without extra spaces
+- **Solution**: Check that the token has appropriate permissions
+- **Solution**: Regenerate the token if it may have been compromised
+
+**Error**: "Contributor not found"
+- **Solution**: Ensure production@lilt.com has been invited and accepted
+- **Solution**: Verify admin permissions are granted to the LILT contributor
+- **Solution**: Check that the contributor hasn't been removed from the project
+
+### Task Assignment Problems
+
+**Error**: "Cannot assign task to contributor"
+- **Solution**: Verify the contributor has appropriate permissions
+- **Solution**: Check that the task status allows assignment
+- **Solution**: Ensure the target language is supported by LILT
+
+**Error**: "Task creation failed"
+- **Solution**: Verify project permissions and access levels
+- **Solution**: Check that source and target languages are configured
+- **Solution**: Ensure sufficient credits or quota for task creation
+
+### Translation Memory Issues
+
+**Issue**: TM sync not working
+- **Solution**: Verify translation_memory_sync is enabled in configuration
+- **Solution**: Check API permissions include translation memory access
+- **Solution**: Monitor sync logs for timing and error information
+
+**Issue**: Translations not updating
+- **Solution**: Wait for the next 30-minute sync cycle
+- **Solution**: Check that translations meet minimum quality thresholds
+- **Solution**: Verify target language mapping between systems
+
+### Performance Issues
+
+**Issue**: Slow task processing
+- **Solution**: Check Lokalise API rate limits and usage
+- **Solution**: Reduce batch sizes for large translation tasks
+- **Solution**: Optimize key filtering to reduce unnecessary processing
+
+**Issue**: Memory sync delays
+- **Solution**: Monitor API quota usage and limits
+- **Solution**: Check network connectivity and API response times
+- **Solution**: Review sync frequency settings and optimization
+
+## FAQ
+
+**Q: Can I use multiple LILT connectors with the same Lokalise project?**
+A: It's recommended to use one connector per project to avoid conflicts. For complex workflows, coordinate with your LILT Production Strategist.
+
+**Q: How does task assignment work with multiple contributors?**
+A: Tasks are specifically assigned to the LILT contributor. Other contributors can collaborate on review and approval processes.
+
+**Q: Can I control which keys get translated?**
+A: Yes, use key filters and tags to control which content is included in translation tasks.
+
+**Q: What happens if I update a translation in Lokalise after sending it to LILT?**
+A: The system uses timestamp-based priority. Newer translations automatically take precedence in the translation memory.
+
+**Q: How do I handle urgent translation requests?**
+A: Use Lokalise's task priority settings and coordinate directly with your LILT team for expedited processing.
+
+**Q: Can I see translation progress in real-time?**
+A: Progress can be monitored through Lokalise's task interface and LILT's project dashboard.
+
+**Q: What file formats are supported?**
+A: The connector works with Lokalise's native key-value format and supports all standard localization file types through Lokalise's import/export features.
+
+**Q: How do I handle translation conflicts?**
+A: The connector uses timestamp-based conflict resolution. Manual review may be needed for complex conflicts.
+
+## Integration Benefits
+
+The Lokalise connector provides:
+- **Seamless Workflow**: Translate content without leaving your Lokalise environment
+- **Quality Options**: Choose between instant AI translation and verified human translation
+- **Memory Optimization**: Leverage previous translations for consistency and efficiency
+- **Task Management**: Use Lokalise's robust task and project management features
+- **Real-time Sync**: Keep translations updated across both platforms automatically
+
+## Additional Resources
+
+- Work with your LILT Production Strategist for optimal workflow configuration
+- Use Lokalise's documentation for advanced project management features
+- Contact your LILT Account Executive for enterprise features and custom integrations
+- Monitor connector performance through both Lokalise and LILT analytics dashboards

@@ -1,0 +1,225 @@
+---
+title: "AWS WorkDocs Connector"
+description: "Connect your AWS WorkDocs to LILT for seamless document translation and collaboration workflows"
+---
+
+## Overview
+
+The AWS WorkDocs connector enables you to sync and manage translation files between your AWS WorkDocs drive and LILT platform. This connector provides automated translation workflows for your document management system, making it easy to collaborate on multilingual content while maintaining your existing WorkDocs structure and permissions.
+
+## Prerequisites
+
+Before setting up the AWS WorkDocs connector, ensure you have:
+
+- AWS account with WorkDocs enabled
+- AWS IAM user with appropriate WorkDocs permissions
+- Access to AWS Management Console
+- Files in supported formats (see [supported file types](/guides/supported-formats))
+- Proper permissions to access and modify folders in WorkDocs
+
+## Required Configuration Parameters
+
+### Authentication
+
+<ParamField path="aws_access_key_id" type="string" required>
+  Your AWS Access Key ID with WorkDocs permissions
+</ParamField>
+
+<ParamField path="aws_secret_access_key" type="string" required>
+  Your AWS Secret Access Key corresponding to the Access Key ID
+</ParamField>
+
+<ParamField path="aws_region" type="string" required>
+  The AWS region where your WorkDocs service is deployed (e.g., `us-east-1`)
+</ParamField>
+
+### WorkDocs Configuration
+
+<ParamField path="organization_id" type="string" required>
+  Your WorkDocs Organization ID from the AWS WorkDocs console
+</ParamField>
+
+<ParamField path="rclone_backend_path" type="string" required>
+  The folder path to import files from (e.g., `/source-documents/`)
+</ParamField>
+
+<ParamField path="rclone_export_backend_path" type="string" optional>
+  The folder path to export translated files to. If not specified, files are exported to the same location as import
+</ParamField>
+
+## Optional Configuration Parameters
+
+### Content Filtering
+
+<ParamField path="rclone_includes" type="array" optional>
+  List of glob patterns to include specific files (e.g., `["**/*.docx", "**/*.pdf"]`)
+</ParamField>
+
+<ParamField path="rclone_excludes" type="array" optional>
+  List of glob patterns to exclude specific files from processing
+</ParamField>
+
+### Advanced Settings
+
+<ParamField path="workdocs_user_email" type="string" optional>
+  Email address of the WorkDocs user to impersonate for file operations
+</ParamField>
+
+<ParamField path="preserve_folder_structure" type="boolean" optional default="true">
+  Whether to maintain the original folder structure in translated content
+</ParamField>
+
+## Setup Instructions
+
+### Step 1: Configure AWS IAM
+
+1. **Create IAM User**
+   - Navigate to AWS IAM Console
+   - Create a new user for LILT connector access
+   - Generate Access Key ID and Secret Access Key
+
+2. **Assign WorkDocs Permissions**
+   - Attach the `AmazonWorkDocsFullAccess` policy
+   - Or create a custom policy with specific WorkDocs permissions:
+     ```json
+     {
+       "Version": "2012-10-17",
+       "Statement": [
+         {
+           "Effect": "Allow",
+           "Action": [
+             "workdocs:GetDocument",
+             "workdocs:GetDocumentVersion",
+             "workdocs:UpdateDocument",
+             "workdocs:CreateFolder",
+             "workdocs:GetFolder",
+             "workdocs:UpdateFolder"
+           ],
+           "Resource": "*"
+         }
+       ]
+     }
+     ```
+
+### Step 2: Get WorkDocs Organization ID
+
+1. **Access WorkDocs Console**
+   - Navigate to AWS WorkDocs in the Management Console
+   - Select your WorkDocs site
+
+2. **Find Organization ID**
+   - Go to **Settings** → **General**
+   - Copy the Organization ID value
+
+### Step 3: Configure LILT Connector
+
+1. **Add Connector in LILT**
+   - Navigate to Settings → Connectors in LILT
+   - Select "AWS WorkDocs" from the available connectors
+
+2. **Enter Configuration**
+   - Input all required parameters from steps above
+   - Test the connection to ensure proper authentication
+
+3. **Set Up Folder Structure**
+   - Configure source and destination folder paths
+   - Ensure proper access permissions for the specified folders
+
+## Advanced Configuration
+
+### Multi-Environment Setup
+
+For organizations with multiple environments (dev, staging, production):
+
+```yaml
+environments:
+  production:
+    aws_region: "us-east-1"
+    organization_id: "d-1234567890"
+    rclone_backend_path: "/production-content/"
+  staging:
+    aws_region: "us-west-2"
+    organization_id: "d-0987654321"
+    rclone_backend_path: "/staging-content/"
+```
+
+### Content Type Filtering
+
+Configure specific document types for translation:
+
+<ParamField path="supported_file_types" type="array" optional>
+  Array of file extensions to process (e.g., `[".docx", ".pdf", ".xlsx"]`)
+</ParamField>
+
+## Best Practices
+
+### Security
+- Store AWS credentials securely using LILT's secret management system
+- Use IAM roles with minimal required permissions
+- Regularly rotate access keys
+- Enable CloudTrail logging for audit purposes
+
+### Performance
+- Organize content in logical folder structures
+- Use file filtering to process only necessary documents
+- Monitor AWS WorkDocs API limits and usage
+- Consider file size limits for optimal processing
+
+### Collaboration
+- Set up shared folders for team collaboration
+- Use WorkDocs comments and annotations for translation feedback
+- Maintain version control through WorkDocs versioning
+- Configure proper user permissions for translators
+
+## Troubleshooting
+
+### Common Issues
+
+**Authentication Errors**
+- Verify AWS credentials are correct and not expired
+- Check IAM permissions for WorkDocs access
+- Ensure the specified region matches your WorkDocs deployment
+
+**File Access Issues**
+- Confirm folder paths exist in WorkDocs
+- Verify user permissions for specified folders
+- Check that files are not locked or being edited by other users
+
+**Sync Problems**
+- Validate file formats are supported
+- Check network connectivity to AWS services
+- Review file size limitations
+- Ensure sufficient storage space in WorkDocs
+
+### Error Messages
+
+| Error | Description | Solution |
+|-------|-------------|----------|
+| `InvalidParameterValue` | Invalid AWS credentials or region | Verify credentials and region settings |
+| `UnauthorizedOperation` | Insufficient permissions | Check IAM policy attachments |
+| `EntityNotExistsException` | Folder or document not found | Verify paths and permissions |
+| `DocumentLockedForCommentsException` | Document is locked for editing | Wait for document to be unlocked or contact owner |
+
+### Support Resources
+
+- Check AWS WorkDocs service status
+- Review CloudTrail logs for API calls
+- Monitor AWS WorkDocs usage metrics
+- Contact LILT support for connector-specific issues
+
+## FAQ
+
+**Q: Can I use AWS WorkDocs connector with multiple organizations?**
+A: Yes, configure separate connector instances for each WorkDocs organization.
+
+**Q: What file types are supported for translation?**
+A: The connector supports common document formats including DOCX, PDF, XLSX, PPTX, and plain text files.
+
+**Q: How are file permissions handled during translation?**
+A: The connector preserves original file permissions and shares translated files with the same access controls.
+
+**Q: Can I translate files that are currently being edited?**
+A: No, files that are locked for editing cannot be processed until they are unlocked.
+
+**Q: Is there a file size limit for translation?**
+A: Yes, WorkDocs has file size limits (typically 5GB per file). Very large files may need to be split for optimal processing.

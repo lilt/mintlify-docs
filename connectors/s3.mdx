@@ -207,12 +207,21 @@ This will append the priority value to project names (e.g., "Website Translation
 - Use IAM roles with minimal required permissions
 - Regularly rotate your AWS access keys
 - Enable S3 bucket versioning for backup and rollback capabilities
+- For enterprise environments, consider using KMS encryption for sensitive content
 
 ### Performance
 
 - Use include/exclude patterns to limit the scope of file synchronization
 - Consider using metadata filters for large buckets with many files
 - Monitor your connector's performance and adjust batch sizes if needed
+- **Important**: Set connector polling frequency to 15 minutes or higher to avoid file grouping issues and ensure proper processing
+
+### On-Premise Deployment
+
+- Use environment variables for secret management instead of hardcoded credentials
+- Configure proper network access to AWS endpoints
+- Ensure connector service has appropriate AWS SDK configuration
+- Test connectivity before full deployment
 
 ## Troubleshooting
 
@@ -226,12 +235,30 @@ This will append the priority value to project names (e.g., "Website Translation
 - **Solution**: Check that the bucket name and path are correct
 - **Solution**: Verify the bucket exists in the specified region
 
+### Connector Status Issues
+
+**Issue**: Connector stuck in "Preparing" state
+- **Solution**: Check that the S3 bucket is accessible and not empty
+- **Solution**: Verify include/exclude patterns are not too restrictive
+- **Solution**: Ensure metadata filtering criteria match existing files
+- **Solution**: Check connector logs for specific error messages
+
+**Issue**: Connector fails to start after configuration
+- **Solution**: Validate all required parameters are provided
+- **Solution**: Test AWS credentials independently using AWS CLI
+- **Solution**: Check network connectivity to S3 endpoints
+
 ### File Processing Issues
 
 **Error**: Files not being imported
 - **Solution**: Check your include/exclude patterns
 - **Solution**: Verify file formats are supported
 - **Solution**: Review metadata filtering criteria
+
+**Issue**: Files imported but not processed
+- **Solution**: Verify file content is valid for the specified format
+- **Solution**: Check if files exceed size limits for processing
+- **Solution**: Ensure files are not corrupted during transfer
 
 ### Performance Issues
 
@@ -240,19 +267,41 @@ This will append the priority value to project names (e.g., "Website Translation
 - **Solution**: Consider breaking large buckets into smaller, focused paths
 - **Solution**: Review and optimize your metadata filtering rules
 
+**Issue**: File grouping problems
+- **Solution**: Increase connector polling frequency to 15 minutes or higher
+- **Solution**: Avoid rapid file uploads to the same bucket path
+- **Solution**: Use metadata-based filtering to control file batching
+
+### On-Premise Specific Issues
+
+**Issue**: Connector cannot access S3 in on-premise environment
+- **Solution**: Configure proper outbound network access to AWS endpoints
+- **Solution**: Set up environment variables for AWS credentials
+- **Solution**: Verify DNS resolution for AWS S3 endpoints
+- **Solution**: Check firewall rules for HTTPS traffic to S3
+
 ## FAQ
 
 **Q: Can I use the S3 connector with S3-compatible services?**
 A: Yes, you can use the connector with S3-compatible services by setting the `s3_provider` and `s3_endpoint` parameters accordingly.
 
 **Q: How often does the connector sync with my S3 bucket?**
-A: The sync frequency depends on your connector configuration and can be set up on a schedule or triggered manually.
+A: The sync frequency depends on your connector configuration and can be set up on a schedule or triggered manually. For optimal performance, use a polling frequency of 15 minutes or higher.
 
 **Q: Can I use the same bucket for both source and translated files?**
 A: Yes, you can use the same bucket by specifying different paths for `rclone_backend_path` and `rclone_export_backend_path`.
 
 **Q: What happens if my S3 bucket has thousands of files?**
-A: Use include/exclude patterns and metadata filtering to limit the scope of synchronization and improve performance.
+A: Use include/exclude patterns and metadata filtering to limit the scope of synchronization and improve performance. Consider organizing files with metadata for better filtering.
 
 **Q: Are there any file size limitations?**
 A: The connector can handle files of various sizes, but very large files may take longer to process. Consider your bandwidth and processing time requirements.
+
+**Q: Why is my connector stuck in "Preparing" state?**
+A: This commonly occurs when the bucket is empty, include/exclude patterns are too restrictive, or metadata filtering criteria don't match any files. Check your configuration and ensure files exist that match your criteria.
+
+**Q: Can I deploy the S3 connector on-premise?**
+A: Yes, but ensure proper network access to AWS endpoints and use environment variables for credential management rather than hardcoded values.
+
+**Q: How do I handle large enterprise buckets with complex file structures?**
+A: Use metadata-based filtering extensively, implement proper file organization strategies, and consider KMS encryption for sensitive content. The connector works well with enterprise-scale deployments when properly configured.

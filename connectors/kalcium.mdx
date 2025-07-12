@@ -1,0 +1,282 @@
+---
+title: "Kalcium Connector"
+description: "Connect your Kalcium QT terminology management system to LILT for seamless terminology synchronization and translation workflows"
+---
+
+## Overview
+
+The Kalcium connector enables bidirectional synchronization between your Kalcium QT (Quality Terminology) system and LILT platform. This enterprise-grade connector provides automated terminology management workflows, ensuring consistent terminology usage across your translation projects while maintaining real-time synchronization between both platforms.
+
+## Prerequisites
+
+Before setting up the Kalcium connector, ensure you have:
+
+- Kalcium QT system with API access enabled
+- Admin or power user permissions in Kalcium
+- Access to Kalcium termbases and terminology content
+- Valid Kalcium tenant configuration
+- Network connectivity to Kalcium server infrastructure
+
+## Required Configuration Parameters
+
+### Authentication
+
+<ParamField path="kalcium_server_url" type="string" required>
+  Your Kalcium server URL (e.g., `https://test.kalcium.cloud/kalcium660`)
+</ParamField>
+
+<ParamField path="kalcium_tenant_id" type="number" required>
+  Your Kalcium tenant ID (numeric value from Kalcium configuration)
+</ParamField>
+
+<ParamField path="kalcium_username" type="string" required>
+  Your Kalcium username with admin rights for full termbase access
+</ParamField>
+
+<ParamField path="kalcium_password" type="string" required>
+  Your Kalcium password (stored securely in LILT's secret management)
+</ParamField>
+
+### Workflow Configuration
+
+<ParamField path="kalcium_workflow_status" type="object" required>
+  Mapping between Kalcium and LILT workflow states (e.g., `{"Finalized": "Reviewed", "Initiated": "Draft"}`)
+</ParamField>
+
+<ParamField path="kalcium_category_mapping_field" type="string" optional default="Usage status">
+  Field used for term mapping and category alignment between languages
+</ParamField>
+
+## Optional Configuration Parameters
+
+### Termbase Selection
+
+<ParamField path="kalcium_termbase_ids" type="array" optional>
+  Array of specific termbase IDs to synchronize. If not specified, all accessible termbases are processed
+</ParamField>
+
+### Term Filtering
+
+<ParamField path="kalcium_term_filters" type="array" optional>
+  Advanced filtering based on Kalcium choice fields (e.g., `[{"field_name": "Usage", "query": ["Standard", "Preferred"]}]`)
+</ParamField>
+
+<ParamField path="kalcium_include_terms" type="boolean" optional default="false">
+  Whether to include terms without specified filtering fields
+</ParamField>
+
+### Synchronization Settings
+
+<ParamField path="source_language" type="string" required>
+  Source language code for terminology extraction (e.g., `en`, `en-US`)
+</ParamField>
+
+<ParamField path="target_languages" type="array" required>
+  Array of target language codes for terminology synchronization (e.g., `["de", "fr", "es"]`)
+</ParamField>
+
+<ParamField path="sync_direction" type="string" optional default="bidirectional">
+  Synchronization direction (`kalcium_to_lilt`, `lilt_to_kalcium`, `bidirectional`)
+</ParamField>
+
+## Setup Instructions
+
+### Step 1: Configure Kalcium API Access
+
+1. **Verify API Access**
+   - Ensure your Kalcium installation has REST API enabled
+   - Confirm your user account has admin privileges
+   - Test connectivity to the Kalcium server
+
+2. **Gather Tenant Information**
+   - Navigate to **Administration** → **System Settings**
+   - Note your tenant ID from the configuration
+   - Verify access to required termbases
+
+### Step 2: Identify Termbase Structure
+
+1. **Map Termbases**
+   - Navigate to **Terminology** → **Termbases**
+   - Identify termbases containing relevant terminology
+   - Note termbase IDs for specific selection (if needed)
+
+2. **Review Term Structure**
+   - Examine term entries and language coverage
+   - Identify relevant choice fields for filtering
+   - Document workflow states used in your organization
+
+### Step 3: Configure Workflow Mapping
+
+1. **Document Kalcium Workflow States**
+   - List workflow states used in your Kalcium instance
+   - Map these to corresponding LILT states
+   - Consider organizational approval processes
+
+2. **Set Up Category Mapping**
+   - Identify the field used for term categorization
+   - Ensure consistent usage across language variants
+   - Document any custom field requirements
+
+### Step 4: Configure LILT Connector
+
+1. **Add Connector in LILT**
+   - Navigate to Settings → Connectors in LILT
+   - Select "Kalcium" from the available connectors
+
+2. **Enter Configuration**
+   - Input all required parameters from previous steps
+   - Test the connection to ensure proper authentication
+
+3. **Validate Termbase Access**
+   - Run a test sync to verify termbase accessibility
+   - Check that filtering and mapping work as expected
+
+## Advanced Configuration
+
+### Multi-Tenant Setup
+
+For organizations with multiple Kalcium tenants:
+
+```yaml
+tenants:
+  production:
+    kalcium_server_url: "https://prod.kalcium.cloud/kalcium660"
+    kalcium_tenant_id: 12345
+    kalcium_termbase_ids: ["tb-001", "tb-002"]
+  development:
+    kalcium_server_url: "https://dev.kalcium.cloud/kalcium660"
+    kalcium_tenant_id: 67890
+    kalcium_termbase_ids: ["tb-dev-001"]
+```
+
+### Advanced Term Filtering
+
+Configure complex filtering based on Kalcium choice fields:
+
+<ParamField path="kalcium_term_filters" type="array" optional>
+  Multi-criteria filtering for precise terminology selection
+</ParamField>
+
+Example configuration:
+```yaml
+kalcium_term_filters:
+  - field_name: "Usage"
+    query: ["Standard", "Preferred"]
+  - field_name: "Status"
+    query: ["Approved", "Final"]
+```
+
+### Workflow State Mapping
+
+<ParamField path="kalcium_workflow_status" type="object" required>
+  Comprehensive mapping between Kalcium and LILT workflow states
+</ParamField>
+
+Default mapping example:
+```yaml
+kalcium_workflow_status:
+  "Finalized": "Reviewed"
+  "Initiated": "Draft"
+  "Under Review": "Draft"
+  "Pending Approval": "Review"
+```
+
+## Best Practices
+
+### Terminology Management
+- Maintain clean, structured terminology in Kalcium
+- Use consistent choice field values across entries
+- Implement proper term versioning and approval workflows
+- Regular termbase maintenance and cleanup
+
+### Synchronization Strategy
+- Start with limited termbase scope for initial testing
+- Use filtering to process only relevant terminology
+- Monitor synchronization performance and adjust batch sizes
+- Implement proper change management procedures
+
+### Quality Assurance
+- Set up proper workflow state mappings for your organization
+- Use category mapping to ensure term alignment across languages
+- Implement review processes for synchronized terminology
+- Monitor for duplicate terms and conflicts
+
+### Performance Optimization
+- Use termbase-specific filtering to reduce processing time
+- Implement efficient category mapping for large termbases
+- Monitor Kalcium API usage and rate limiting
+- Schedule synchronization during off-peak hours for large datasets
+
+## Troubleshooting
+
+### Common Issues
+
+**Authentication Problems**
+- Verify Kalcium server URL is correct and accessible
+- Check username and password credentials
+- Confirm tenant ID is correct
+- Test API connectivity independently
+
+**Termbase Access Issues**
+- Verify user has access to specified termbases
+- Check termbase IDs are correct and exist
+- Ensure termbases contain terminology in required languages
+- Confirm termbase export permissions
+
+**Synchronization Failures**
+- Monitor background export jobs in Kalcium
+- Check for network connectivity issues
+- Verify workflow state mappings are correct
+- Review filtering criteria for term selection
+
+### Error Messages
+
+| Error | Description | Solution |
+|-------|-------------|----------|
+| `AuthenticationFailed` | Invalid credentials or tenant | Verify username, password, and tenant ID |
+| `TermbaseNotFound` | Termbase ID doesn't exist | Check termbase configuration in Kalcium |
+| `ExportJobTimeout` | Export job exceeded time limit | Reduce termbase scope or contact Kalcium support |
+| `WorkflowMappingError` | Invalid workflow state mapping | Review and correct workflow state configuration |
+| `APIRateLimitExceeded` | Too many API requests | Implement rate limiting or adjust sync frequency |
+| `TermFilterError` | Invalid filtering configuration | Check filter field names and query values |
+
+### Performance Optimization
+
+- Use specific termbase IDs to limit scope
+- Implement appropriate term filtering to reduce processing
+- Monitor Kalcium server performance during large exports
+- Use efficient workflow state mappings
+- Implement proper error handling and retry logic
+
+### Support Resources
+
+- Check Kalcium system status and API availability
+- Review Kalcium documentation for API limitations
+- Monitor background job status in Kalcium interface
+- Contact LILT support for connector-specific issues
+
+## FAQ
+
+**Q: Which versions of Kalcium QT are supported?**
+A: The connector supports Kalcium QT systems with REST API enabled. Contact your Kalcium administrator to verify API availability.
+
+**Q: Can I synchronize specific termbases only?**
+A: Yes, use the `kalcium_termbase_ids` parameter to specify which termbases to synchronize, or sync all accessible termbases.
+
+**Q: How are workflow states mapped between platforms?**
+A: The connector uses configurable workflow state mapping to align Kalcium and LILT approval processes according to your organization's needs.
+
+**Q: Can I filter terms based on specific criteria?**
+A: Yes, use the `kalcium_term_filters` parameter to filter terms based on choice fields, usage status, or other Kalcium metadata.
+
+**Q: What happens to existing terms when synchronizing?**
+A: The connector intelligently handles existing terms, creating change requests for modifications and avoiding duplicates through sophisticated matching.
+
+**Q: How are multi-language term entries handled?**
+A: The connector maintains term relationships across languages using category mapping, ensuring proper alignment of term variants.
+
+**Q: Can I set up automated synchronization schedules?**
+A: Yes, the connector supports scheduled synchronization and can be configured to run automatically at specified intervals.
+
+**Q: How are conflicts between platforms resolved?**
+A: The connector includes conflict resolution logic and can be configured to prioritize changes from either platform based on your workflow requirements.

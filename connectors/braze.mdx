@@ -1,0 +1,296 @@
+---
+title: "Braze Connector"
+description: "Connect your Braze customer engagement platform to LILT for seamless email and marketing content translation"
+---
+
+## Overview
+
+The Braze connector enables you to translate and localize your customer engagement content directly within the Braze platform. This tag-based connector provides automated workflows for translating email templates, in-app messages, push notifications, and other marketing content, making it easy to reach global audiences with personalized, localized messaging.
+
+## Prerequisites
+
+Before setting up the Braze connector, ensure you have:
+
+- A Braze account with appropriate permissions to manage API keys and tags
+- Admin access to create and manage tags in your Braze workspace
+- Access to the Braze Developer Console for API key generation
+- Content templates ready for translation
+
+## Setup Instructions
+
+### Step 1: Generate Braze API Key
+
+1. **Access Developer Console**
+   - Navigate to **Settings** → **API Settings** in your Braze dashboard
+   - Alternatively, go directly to your [Developer Console](https://dashboard-03.braze.com/app_settings/developer_console/apisettings/)
+
+2. **Create New API Key**
+   - Click **Create New API Key**
+   - Provide a descriptive name (e.g., "LILT Translation Integration")
+   - Configure the following permissions:
+
+3. **Required Permissions**
+   - Enable **all permissions** under the **Template** section:
+     - `templates.email.create`
+     - `templates.email.info`
+     - `templates.email.list`
+     - `templates.email.update`
+     - And all other template-related permissions
+
+4. **Save API Key**
+   - Copy the generated API key securely
+   - Note your Braze API Base URL from the endpoint information
+
+### Step 2: Configure LILT Tags
+
+1. **Navigate to Tag Management**
+   - Go to **Settings** → **Manage Tags**
+   - Click **Add New Tag**
+
+2. **Create Required Tags**
+   Create the following tags exactly as specified:
+   - `Lilt: Ready` - Content ready for translation
+   - `Lilt: In progress` - Content currently being translated
+   - `Lilt: Sent to Lilt` - Content submitted to LILT
+   - `Lilt: Delivered` - Translation completed and delivered
+   - `Lilt: Needs Attention` - Content requiring manual review
+
+3. **Optional Workflow Tags**
+   - `Lilt: Instant` - Request instant AI translation
+   - `Lilt: Translate de-DE` - Language-specific translation tags
+   - `Lilt: Translate fr-FR` - Create as needed for each target language
+
+### Step 3: Get API Base URL
+
+1. **Find Your Endpoint**
+   - Check your Braze dashboard URL or API documentation
+   - Common endpoints include:
+     - `https://rest.iad-01.braze.com` (US-01)
+     - `https://rest.iad-02.braze.com` (US-02)
+     - `https://rest.iad-03.braze.com` (US-03)
+     - `https://rest.fra-01.braze.com` (EU-01)
+
+2. **Verify Base URL**
+   - Ensure the URL matches your specific Braze instance
+   - This information is available in your Braze dashboard
+
+## Required Configuration Parameters
+
+### Authentication
+
+<ParamField path="braze_api_key" type="string" required>
+  Your Braze API key with template permissions enabled
+</ParamField>
+
+<ParamField path="braze_api_base_url" type="string" required>
+  Your Braze API base URL (e.g., https://rest.iad-01.braze.com)
+</ParamField>
+
+### Content Configuration
+
+<ParamField path="source_language" type="string" required>
+  Source language code for your content
+</ParamField>
+
+<ParamField path="target_languages" type="array" required>
+  Array of target language codes for translation
+</ParamField>
+
+## Translation Workflow
+
+### Tag-Based Content Management
+
+The Braze connector uses a tag-based workflow for managing translation requests:
+
+1. **Content Preparation**
+   - Create or identify content for translation in Braze
+   - Apply the `Lilt: Ready` tag to indicate content is ready for translation
+
+2. **Translation Request**
+   - The connector automatically detects content with `Lilt: Ready` tags
+   - Content is pulled according to the configured schedule
+   - Tags are updated to `Lilt: In progress` when processing begins
+
+3. **Translation Processing**
+   - Content is processed through LILT's translation pipeline
+   - Tags are updated to `Lilt: Sent to Lilt` during processing
+
+4. **Delivery**
+   - Completed translations are delivered back to Braze
+   - Tags are updated to `Lilt: Delivered` upon completion
+   - Translated content appears in your Braze templates
+
+### Content Types Supported
+
+- **Email Templates**: Subject lines, HTML content, and plain text versions
+- **In-App Messages**: Title, body, and button text
+- **Push Notifications**: Title, alert text, and custom payloads
+- **SMS Templates**: Message content and personalization
+- **Content Cards**: Headlines, descriptions, and call-to-action text
+
+## Advanced Features
+
+### Instant Translation
+
+For urgent content that needs immediate translation:
+
+1. **Apply Instant Tag**
+   - Add the `Lilt: Instant` tag to your content
+   - Content will be processed with AI-powered instant translation
+
+2. **Scheduling**
+   - Instant translations still follow the connector pull schedule
+   - For true urgency, coordinate with your LILT team
+
+### Language-Specific Translation
+
+Control which languages are translated by using specific tags:
+
+```yaml
+# Translate only to German
+Tag: "Lilt: Translate de-DE"
+
+# Translate only to French
+Tag: "Lilt: Translate fr-FR"
+
+# Translate to multiple specific languages
+Tags: ["Lilt: Translate es-ES", "Lilt: Translate pt-BR"]
+```
+
+### Content Filtering
+
+The connector uses specialized Okapi filters for optimal content processing:
+
+- **HTML Templates**: Custom filtering for Braze HTML email templates
+- **JSON Content**: Specialized handling for structured content and personalization
+- **Rich Media**: Support for images, links, and interactive elements
+
+## Best Practices
+
+### Template Organization
+
+- Use consistent naming conventions for templates across languages
+- Organize templates in logical folders or campaigns
+- Implement version control for template updates
+- Use Braze's template versioning features
+
+### Tag Management
+
+- Apply tags consistently across your team
+- Use descriptive tag names for complex workflows
+- Remove outdated tags to maintain clean organization
+- Monitor tag usage and effectiveness
+
+### Content Preparation
+
+- Finalize content before applying translation tags
+- Use Braze's preview features to verify content rendering
+- Test personalization and dynamic content thoroughly
+- Ensure all linked assets are accessible
+
+### Quality Control
+
+- Review translated content in Braze's preview mode
+- Test email renders across different clients and devices
+- Verify personalization tokens and dynamic content
+- Use A/B testing for translated campaigns
+
+### Performance Optimization
+
+- Batch related content for efficient processing
+- Use language-specific tags to control translation scope
+- Monitor connector performance and processing times
+- Coordinate major content updates with LILT team
+
+## Troubleshooting
+
+### API Authentication Issues
+
+**Error**: "Invalid API key"
+- **Solution**: Verify the API key was copied correctly
+- **Solution**: Check that all template permissions are enabled
+- **Solution**: Regenerate the API key if necessary
+
+**Error**: "API endpoint not found"
+- **Solution**: Verify the API base URL matches your Braze instance
+- **Solution**: Check for typos in the endpoint URL
+- **Solution**: Confirm your Braze account region and corresponding endpoint
+
+### Tag Management Problems
+
+**Issue**: Tags not being recognized
+- **Solution**: Ensure tag names match exactly (case-sensitive)
+- **Solution**: Verify tags are applied to the correct content type
+- **Solution**: Check that tags are visible in the Braze interface
+
+**Issue**: Content stuck in "In progress" state
+- **Solution**: Check connector logs for processing errors
+- **Solution**: Verify content format is supported
+- **Solution**: Contact LILT support for pipeline status
+
+### Content Processing Issues
+
+**Issue**: Translations not appearing in Braze
+- **Solution**: Check that delivery tags are being updated
+- **Solution**: Verify target language settings
+- **Solution**: Review content format and structure
+
+**Issue**: Incomplete translations
+- **Solution**: Check for content filtering or exclusion rules
+- **Solution**: Verify all translatable fields are properly configured
+- **Solution**: Review HTML structure and markup
+
+### Performance Issues
+
+**Issue**: Slow content processing
+- **Solution**: Reduce batch sizes for large content volumes
+- **Solution**: Check Braze API rate limits
+- **Solution**: Optimize content structure and complexity
+
+**Issue**: Tag update delays
+- **Solution**: Monitor Braze API response times
+- **Solution**: Check network connectivity
+- **Solution**: Review connector scheduling configuration
+
+## FAQ
+
+**Q: Can I translate content across different Braze workspaces?**
+A: Each connector instance is configured for a specific Braze workspace. Multiple workspaces require separate connector configurations.
+
+**Q: How do I handle personalization tokens in translated content?**
+A: Personalization tokens are preserved during translation. Test thoroughly to ensure proper rendering in all languages.
+
+**Q: Can I translate archived or draft templates?**
+A: The connector can process templates in various states. Coordinate with your LILT team for specific requirements.
+
+**Q: What happens if I update content while it's being translated?**
+A: Content updates during translation may require reprocessing. Use version control and coordinate updates carefully.
+
+**Q: How do I handle right-to-left languages in email templates?**
+A: RTL languages require special CSS considerations. Work with your development team for proper template structure.
+
+**Q: Can I set up automated workflows for new content?**
+A: Yes, you can create automated processes that apply translation tags based on content creation or campaign triggers.
+
+**Q: How do I track translation costs and usage?**
+A: Translation metrics are available through both Braze analytics and LILT's reporting dashboard.
+
+**Q: Can I customize the translation workflow for different content types?**
+A: Yes, coordinate with your LILT Production Strategist to configure custom workflows for different content categories.
+
+## Content Filtering
+
+The Braze connector includes specialized filters for optimal content processing:
+
+- **HTML Email Filtering**: Preserves email structure while extracting translatable content
+- **JSON Template Processing**: Handles structured content and dynamic fields
+- **Rich Text Support**: Maintains formatting, links, and interactive elements
+- **Personalization Preservation**: Protects Braze-specific tokens and merge fields
+
+## Additional Resources
+
+- Review the [Braze onboarding guide](attachment:braze-lilt-onboarding-guide.pdf) for detailed setup instructions
+- Work with your LILT Production Strategist for workflow optimization
+- Use Braze's extensive documentation for advanced template management
+- Contact your LILT Account Executive for enterprise features and custom configurations
+- Monitor performance through both Braze analytics and LILT's project dashboard

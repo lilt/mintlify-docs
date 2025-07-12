@@ -1,0 +1,331 @@
+---
+title: "Webflow Connector"
+description: "Connect your Webflow CMS to LILT for seamless website content translation and localization"
+---
+
+## Overview
+
+The Webflow connector enables you to translate and localize your Webflow CMS content through LILT's professional translation services. This collection-based connector focuses on dynamic content stored in Webflow Collections, providing automated workflows for translating website content while maintaining design integrity and functionality.
+
+## Prerequisites
+
+Before setting up the Webflow connector, ensure you have:
+
+- A Webflow account with CMS access and API permissions
+- Collections containing dynamic content ready for translation
+- Understanding of Webflow's Collection structure and field types
+- Target language Collections already created in Webflow
+
+## Understanding Webflow Localization
+
+### Content Types in Webflow
+
+Webflow content falls into two categories:
+
+1. **Static Content**: Hardcoded into design templates (not processed by the connector)
+2. **Dynamic Content**: Stored in Collections databases (processed by the connector)
+
+### Localization Limitations
+
+- Webflow has **no native multilingual solution**
+- Collections are language-agnostic by default
+- No built-in locale settings or language fields
+- Manual setup required for multilingual structure
+
+## Setup Instructions
+
+### Step 1: Generate Webflow API Key
+
+1. **Access Site Settings**
+   - Navigate to your Webflow site
+   - Click the ellipsis icon (⋯) in the bottom right corner
+   - Select **Settings**
+
+2. **Generate API Token**
+   - Go to the **Integrations** tab
+   - Scroll to the **API access** section
+   - Click **Generate New API Token**
+   - Copy and securely store the generated token
+
+### Step 2: Identify Source Collections
+
+1. **Find Collection IDs**
+   - Navigate to your CMS Collections
+   - Click **Settings** next to the collection name
+   - Copy the Collection ID displayed at the top
+
+2. **Document Content Structure**
+   - Note all translatable fields within each collection
+   - Identify field types (text, rich text, etc.)
+   - Map content relationships and dependencies
+
+### Step 3: Create Target Language Collections
+
+1. **Duplicate Source Collections**
+   - Create a new collection for each target language
+   - Use Collection Templates for consistency
+   - Click on the source collection template to inherit all fields
+
+2. **Maintain Field Structure**
+   - Ensure target collections have **identical field structures**
+   - Field names, types, and settings must match exactly
+   - Preserve validation rules and requirements
+
+3. **Collect Target Collection IDs**
+   - Note the Collection ID for each target language collection
+   - These will be mapped to specific languages in LILT
+
+## Required Configuration Parameters
+
+### Authentication
+
+<ParamField path="webflow_api_key" type="string" required>
+  Your Webflow API token with CMS access permissions
+</ParamField>
+
+### Collection Configuration
+
+<ParamField path="source_collection_ids" type="array" required>
+  Array of Collection IDs containing source content for translation
+</ParamField>
+
+<ParamField path="target_collection_mapping" type="object" required>
+  Mapping of target language codes to their corresponding Collection IDs
+</ParamField>
+
+<ParamField path="source_language" type="string" required>
+  Source language code for the content
+</ParamField>
+
+### Content Processing
+
+<ParamField path="field_mapping" type="object" optional>
+  Specific field mappings between source and target collections if different
+</ParamField>
+
+<ParamField path="content_filters" type="array" optional>
+  Filters to include/exclude specific content based on field values
+</ParamField>
+
+## Collection Structure Requirements
+
+### Field Compatibility
+
+For successful translation, ensure:
+
+- **Identical Field Names**: Source and target collections must have matching field names
+- **Matching Field Types**: Text, rich text, and other field types must correspond
+- **Validation Rules**: Any field validation must be consistent across collections
+- **Required Fields**: Required field settings must match between collections
+
+### Content Format Support
+
+The connector processes content as **JSON+HTML**, supporting:
+
+- **Plain Text Fields**: Basic text content
+- **Rich Text Fields**: HTML-formatted content with styling
+- **Reference Fields**: Links to other collection items
+- **Multi-reference Fields**: Multiple linked items
+
+### Slug Field Considerations
+
+- **Critical Requirement**: Slug fields must follow proper slug formatting
+- **Format**: Lowercase, hyphen-separated, no spaces or special characters
+- **Impact**: Improper slug format will break the import process
+- **Best Practice**: Validate slug formatting before translation
+
+## Translation Workflow
+
+### Content Processing
+
+1. **Content Detection**
+   - Connector pulls updated items from source collections
+   - Only processes items modified since last sync
+   - Extracts translatable content as JSON+HTML
+
+2. **Translation Processing**
+   - Content is processed through LILT's translation pipeline
+   - Maintains HTML structure and formatting
+   - Preserves Webflow-specific field requirements
+
+3. **Content Delivery**
+   - Translated content is imported to target collections
+   - Field mappings ensure proper placement
+   - Validation checks maintain data integrity
+
+### Collection Status Management
+
+- **Status Field**: Collection item status is preserved during translation
+- **Publishing**: Translated items maintain original publishing states
+- **Workflow**: Integration with Webflow's content workflow stages
+
+## Best Practices
+
+### Content Organization
+
+- Use consistent naming conventions for collections across languages
+- Organize collections with clear hierarchies and relationships
+- Implement logical field naming that translates well across languages
+- Group related content types for efficient batch processing
+
+### Collection Design
+
+- Design fields with translation in mind (avoid hardcoded text)
+- Use rich text fields for content requiring formatting preservation
+- Implement proper field validation that works across languages
+- Consider text expansion when designing field length limits
+
+### Quality Control
+
+- Review translated content in Webflow's CMS preview
+- Test all dynamic page rendering with translated content
+- Verify collection relationships and references work correctly
+- Check slug formatting and URL structure for each language
+
+### Performance Optimization
+
+- Batch related content updates for efficient processing
+- Use collection filtering to focus on specific content types
+- Monitor API rate limits and collection size constraints
+- Optimize collection structure for translation efficiency
+
+## Advanced Configuration
+
+### Multi-Site Management
+
+For multiple Webflow sites:
+
+```yaml
+# Site-specific configuration
+sites:
+  - site_id: "site_1"
+    api_key: "api_key_1"
+    collections: ["collection_1", "collection_2"]
+  - site_id: "site_2"
+    api_key: "api_key_2"
+    collections: ["collection_3", "collection_4"]
+```
+
+### Content Filtering
+
+```yaml
+# Filter collections by specific criteria
+content_filters:
+  - field: "status"
+    value: "published"
+  - field: "category"
+    values: ["blog", "news", "updates"]
+```
+
+### Field Mapping
+
+```yaml
+# Map fields between source and target collections
+field_mapping:
+  source_field_name: "target_field_name"
+  content_title: "titulo_contenido"
+  body_text: "texto_cuerpo"
+```
+
+## Troubleshooting
+
+### API Authentication Issues
+
+**Error**: "Invalid API key"
+- **Solution**: Verify the API key was copied correctly
+- **Solution**: Check that the key has CMS access permissions
+- **Solution**: Regenerate the API key if necessary
+
+**Error**: "Rate limit exceeded"
+- **Solution**: Reduce batch size for content processing
+- **Solution**: Implement request throttling
+- **Solution**: Contact Webflow support for rate limit increases
+
+### Collection Configuration Problems
+
+**Error**: "Collection not found"
+- **Solution**: Verify Collection IDs are correct and accessible
+- **Solution**: Check that collections exist and haven't been deleted
+- **Solution**: Ensure API key has access to specified collections
+
+**Error**: "Field mismatch between collections"
+- **Solution**: Verify source and target collections have identical field structures
+- **Solution**: Check field names, types, and validation rules
+- **Solution**: Recreate target collections using source templates
+
+### Content Import Issues
+
+**Error**: "Slug format invalid"
+- **Solution**: Ensure all slug fields follow proper formatting rules
+- **Solution**: Check for spaces, special characters, or uppercase letters
+- **Solution**: Validate slug format before import
+
+**Error**: "Required field missing"
+- **Solution**: Verify all required fields are populated in source content
+- **Solution**: Check field mappings between source and target
+- **Solution**: Update content to include all required fields
+
+### Performance Issues
+
+**Issue**: Slow content synchronization
+- **Solution**: Optimize collection structure and reduce field complexity
+- **Solution**: Use content filtering to process smaller batches
+- **Solution**: Check Webflow API response times and limits
+
+**Issue**: Content validation errors
+- **Solution**: Review field validation rules and constraints
+- **Solution**: Check content format compatibility
+- **Solution**: Verify HTML structure in rich text fields
+
+## FAQ
+
+**Q: Can the connector translate static content in Webflow designs?**
+A: No, the connector only processes dynamic content stored in Collections. Static content requires manual translation through Webflow's Designer.
+
+**Q: How do I handle content relationships between collections?**
+A: Content relationships are preserved during translation. Ensure related collections are also translated to maintain reference integrity.
+
+**Q: Can I translate multiple collections simultaneously?**
+A: Yes, the connector can process multiple collections in a single configuration, making it efficient for sites with complex content structures.
+
+**Q: What happens to collection item slugs during translation?**
+A: Slugs must be manually managed to ensure proper URL structure for each language. Consider implementing language-specific slug strategies.
+
+**Q: How do I handle rich text content with embedded elements?**
+A: Rich text fields are processed as HTML, preserving formatting and embedded elements. Test thoroughly to ensure proper rendering.
+
+**Q: Can I use the connector with Webflow's staging environment?**
+A: Yes, the connector can be configured for staging environments. Use separate API keys and collection configurations for each environment.
+
+**Q: How do I manage content updates after initial translation?**
+A: The connector processes updated items since the last sync, allowing for continuous localization of content updates.
+
+**Q: What's the best way to organize multilingual content in Webflow?**
+A: Create separate collections for each language with clear naming conventions, and consider implementing a content tagging system for better organization.
+
+## Demo Environment
+
+For testing and demonstration purposes, you can access LILT's Webflow demo environment:
+- **URL**: [webflow.com](https://webflow.com)
+- **Demo Credentials**: Available through your LILT Account Executive
+- **Test Collections**: Pre-configured collections for testing translation workflows
+
+## Connector Limitations
+
+### Content Scope
+- **Dynamic Content Only**: Static design content is not processed
+- **Collection-Based**: Only content stored in Collections is translatable
+- **Field Structure**: Requires identical field structures across language collections
+
+### Technical Constraints
+- **No Native Localization**: Webflow lacks built-in multilingual features
+- **Manual Collection Setup**: Target collections must be created manually
+- **Slug Management**: URL slugs require manual formatting and validation
+
+## Additional Resources
+
+- [Webflow Internal Documentation](https://www.notion.so/lilt/Webflow-53658173240e4dceb94e20eb202e921a)
+- [LILT GitHub Connector Documentation](https://github.com/lilt/connectors/wiki/webflow)
+- [Webflow University - Collections and Dynamic Content](https://university.webflow.com/courses/webflow-101-crash-course)
+- Work with your LILT Production Strategist for workflow optimization
+- Contact your LILT Account Executive for enterprise features and custom configurations

@@ -1,0 +1,391 @@
+---
+title: "Azure Blob Storage Connector"
+description: "Connect your Azure Blob Storage containers to LILT for seamless cloud-based file translation and content management"
+---
+
+## Overview
+
+The Azure Blob Storage connector enables you to translate and manage files stored in Microsoft Azure Blob Storage containers through LILT's translation services. Built on the reliable rclone framework, this connector provides automated workflows for importing content from Azure containers, processing it through LILT's translation pipeline, and delivering completed translations back to designated output containers.
+
+## Prerequisites
+
+Before setting up the Azure Blob Storage connector, ensure you have:
+
+- An Azure Storage account with appropriate blob containers configured
+- Admin access to generate SAS (Shared Access Signature) URLs
+- IP address allowlisting configured for LILT's services
+- Microsoft Azure Storage Explorer installed for container management
+- Properly structured input and output containers following naming conventions
+
+## Container Architecture
+
+### Required Container Types
+
+**Input Containers**: Store source files for translation
+- **Format**: `<identifier>-input`
+- **Permissions**: List, Read & Write
+- **Purpose**: Files to be imported and translated
+
+**Output Containers**: Receive translated files
+- **Format**: `<identifier>-output`  
+- **Permissions**: List, Read & Write
+- **Purpose**: Delivery location for completed translations
+
+**Archive Containers**: Backup processed files
+- **Format**: `<identifier>-input-archive`, `<identifier>-output-archive`
+- **Permissions**: List & Read only
+- **Purpose**: Historical backup of processed content
+
+### Naming Conventions
+
+Use consistent UUID-based naming for reliable identification:
+
+```
+Container Examples:
+├── 21896393-58fe-47a0-ae4b-1c15df184266-input/
+├── 21896393-58fe-47a0-ae4b-1c15df184266-output/
+└── 21896393-58fe-47a0-ae4b-1c15df184266-input-archive/
+```
+
+## Setup Instructions
+
+### Step 1: Generate SAS URLs
+
+1. **Access Azure Portal**
+   - Navigate to your Azure Storage account
+   - Go to **Security + networking** → **Shared access signature**
+
+2. **Configure SAS Parameters**
+   - Set **Allowed services**: Blob
+   - Set **Allowed resource types**: Service, Container, Object
+   - Configure **Allowed permissions** based on container type:
+     - Input/Output containers: Read, Write, List, Create, Delete
+     - Archive containers: Read, List only
+   - Set appropriate **Start and expiry date/time** (typically 60-180 days)
+
+3. **Generate SAS URLs**
+   - Click **Generate SAS and connection string**
+   - Copy the **Blob service SAS URL** for connector configuration
+   - Store URLs securely with expiration date tracking
+
+### Step 2: Configure Azure Storage Explorer
+
+1. **Install Azure Storage Explorer**
+   - Download from [Microsoft Azure Storage Explorer](https://azure.microsoft.com/features/storage-explorer/)
+   - Install following standard procedures
+
+2. **Connect to Storage Account**
+   - Open Azure Storage Explorer
+   - Select **Attach to a resource** → **Storage account or service**
+   - Choose **Shared access signature URL (SAS)**
+   - Enter your generated SAS URL
+   - Provide a descriptive display name for easy identification
+
+3. **Verify Container Access**
+   - Confirm all required containers are visible
+   - Test read/write permissions by uploading a test file
+   - Verify proper folder structure and access levels
+
+### Step 3: Configure LILT Connector
+
+1. **Basic Authentication**
+   - Configure `azure_sas_url` with your primary SAS URL
+   - Optionally configure `azure_sas_url_upload` for separate upload permissions
+
+2. **Path Mapping Configuration**
+   - Set up **Import Locale Map** for language detection from file paths
+   - Configure **Export Path Map** to route translated files to output containers
+
+3. **Container Filtering**
+   - Use **Include Path** parameters for targeted file extraction
+   - Configure file format filters to process only supported file types
+
+## Required Configuration Parameters
+
+### Authentication
+
+<ParamField path="azure_sas_url" type="string" required>
+  Primary Azure SAS URL for secure access to blob containers
+</ParamField>
+
+<ParamField path="azure_sas_url_upload" type="string" optional>
+  Optional separate SAS URL for upload operations when different permissions are required
+</ParamField>
+
+### Path Configuration
+
+<ParamField path="import_locale_map" type="object" optional>
+  Maps file path patterns to appropriate translation memories (e.g., `*en/zh*` → zh-CN)
+</ParamField>
+
+<ParamField path="export_path_map" type="string" optional>
+  Template for routing translated files to output containers (e.g., `{full_path | replace("-input", "-output")}`)
+</ParamField>
+
+<ParamField path="include_path" type="array" optional>
+  Filter patterns to specify which files should be processed for translation
+</ParamField>
+
+## Translation Workflow
+
+### Automated Processing Cycle
+
+1. **Content Detection**
+   - Connector periodically scans configured input containers
+   - Only processes [supported file formats](https://support.lilt.com/kb/supported-file-formats)
+   - Automatically creates translation projects for new content
+
+2. **File Import**
+   - Source files are imported from input containers
+   - Files are automatically moved to processed backup directories
+   - Import locale mapping determines appropriate translation memory
+
+3. **Translation Processing**
+   - Content is processed through LILT's translation pipeline
+   - File structure and formatting are preserved during translation
+
+4. **Content Delivery**
+   - Completed translations are delivered to designated output containers
+   - Export path mapping ensures proper file placement
+   - Original container structure is maintained in output location
+
+### File Path Structure Example
+
+```
+Input Structure:
+en/zh/76a85346-ad1d-4c22-97f1-cb8a04167abc/messages.po
+├── Source language: en
+├── Target language: zh  
+├── Project ID: 76a85346-ad1d-4c22-97f1-cb8a04167abc
+└── File: messages.po
+
+Output Structure:
+zh/76a85346-ad1d-4c22-97f1-cb8a04167abc/messages.po
+├── Target language becomes primary path
+├── Translated content delivered
+└── File structure preserved
+```
+
+## Critical: SAS URL Expiration Management
+
+### Understanding Expiration Impact
+
+**Critical Issue**: Azure SAS URLs expire every 60-180 days, causing complete connector failure if not properly managed.
+
+**Risk**: Active translation jobs can fail if credentials expire during processing.
+
+### Proactive Management Strategy
+
+1. **Track Expiration Dates**
+   - Monitor expiration timestamps in SAS URLs (format: `se=2024-05-07T11:27:34Z`)
+   - Maintain spreadsheet tracking all blob containers and expiration dates
+   - Set up automated reminders 30 days before expiration
+
+2. **Update Process**
+   - **Before Expiration**: Contact customer for updated SAS URLs
+   - **Test First**: Update one connector and verify functionality
+   - **Batch Update**: Update all related connectors systematically
+   - **Translation Memory**: Verify TM connectors have updated credentials
+
+3. **Secret Management Best Practices**
+   - Keep secret names identical when updating in Connectors Admin
+   - Delete old secret and immediately create new one with same name
+   - This prevents "Expired Password and Secret" errors across multiple connectors
+
+### Emergency Recovery
+
+If credentials expire unexpectedly:
+
+1. **Immediate Response**
+   - Contact customer immediately for updated SAS URLs
+   - Identify all affected connectors and jobs
+   - Pause active jobs if possible to prevent data loss
+
+2. **Credential Update**
+   - Update Azure Storage Explorer connections first
+   - Remove expired connections via "Detach"
+   - Test connectivity before updating connectors
+   - Update all connector configurations systematically
+
+## Troubleshooting
+
+### Authentication Issues
+
+**Error**: "Access denied" or "Authentication failed"
+- **Solution**: Verify SAS URL has not expired
+- **Solution**: Check SAS URL permissions match container requirements
+- **Solution**: Confirm IP address allowlisting includes LILT services
+
+**Error**: "Container not found"
+- **Solution**: Verify container names match exactly in configuration
+- **Solution**: Check SAS URL scope includes required containers
+- **Solution**: Confirm containers exist and are accessible
+
+### File Processing Issues
+
+**Issue**: Files not being imported
+- **Solution**: Verify files are in [supported formats](https://support.lilt.com/kb/supported-file-formats)
+- **Solution**: Check Include Path filters are not excluding content
+- **Solution**: Confirm files are not already in processed backup directory
+
+**Issue**: Translations not appearing in output containers
+- **Solution**: Verify export path mapping configuration
+- **Solution**: Check output container permissions allow writes
+- **Solution**: Confirm target container exists and is accessible
+
+### File Location and Debugging
+
+**Issue**: "Where are these files?" - locating files by Azure Blob ID
+
+**Search Process**:
+1. Check Azure "input" container for new files awaiting import
+2. Search "output-archive" container for files already imported to LILT
+3. Check "output" container for delivered translated files
+4. Use Connectors Admin → Documents search with Blob ID
+
+**Technical Solution**: Azure Blob ID is included in LILT document names for direct search capability
+
+### Performance Issues
+
+**Issue**: Slow file processing
+- **Solution**: Check Azure API rate limits and adjust polling frequency
+- **Solution**: Optimize Include Path filters to reduce unnecessary scanning
+- **Solution**: Break large container operations into smaller batches
+
+**Issue**: Credential update delays
+- **Solution**: Update Azure Storage Explorer connections first
+- **Solution**: Test single connector before batch updates
+- **Solution**: Coordinate updates during low-activity periods
+
+## Best Practices
+
+### Container Management
+
+- Use descriptive container names that clearly indicate purpose and language
+- Implement consistent naming conventions across all storage accounts
+- Organize files with logical directory structures for easy navigation
+- Regularly clean up archived containers to manage storage costs
+
+### Credential Security
+
+- Store SAS URLs securely with restricted access
+- Use minimum required permissions for each container type
+- Set reasonable expiration periods balancing security and maintenance
+- Document expiration dates and renewal procedures
+
+### File Organization
+
+- Use UUID-based directory structures for unique identification
+- Encode source and target languages in file paths when possible
+- Maintain consistent file naming conventions across projects
+- Implement proper folder hierarchies for scalable organization
+
+### Monitoring and Maintenance
+
+- Monitor connector performance and processing times
+- Track file processing success rates and error patterns
+- Set up alerts for authentication failures or processing delays
+- Maintain backup procedures for critical translation content
+
+## Advanced Configuration
+
+### Multi-Container Management
+
+For complex deployments with multiple language service providers:
+
+```yaml
+# Separate containers per language service provider
+containers:
+  - provider: "LSP-A"
+    input: "lsp-a-12345-input"
+    output: "lsp-a-12345-output"
+    archive: "lsp-a-12345-archive"
+  - provider: "LSP-B"  
+    input: "lsp-b-67890-input"
+    output: "lsp-b-67890-output"
+    archive: "lsp-b-67890-archive"
+```
+
+### Path Mapping Examples
+
+```yaml
+# Language detection from file paths
+import_locale_map:
+  "*en/zh*": "zh-CN"
+  "*en/es*": "es-ES"
+  "*en/fr*": "fr-FR"
+
+# Output routing configuration  
+export_path_map: "{full_path | replace('-input', '-output')}"
+```
+
+### Content Filtering
+
+```yaml
+# Include only specific file types
+include_path:
+  - "*.po"
+  - "*.xliff"
+  - "*.json"
+  - "*.xml"
+
+# Exclude test or temporary files
+exclude_path:
+  - "*test*"
+  - "*temp*"
+  - "*.bak"
+```
+
+## FAQ
+
+**Q: How often does the connector check for new files?**
+A: The connector performs periodic checks rather than continuous monitoring. Check frequency is configured during setup based on your workflow requirements.
+
+**Q: What file formats are supported?**
+A: The connector processes all [LILT-supported file formats](https://support.lilt.com/kb/supported-file-formats). Unsupported files are ignored during processing.
+
+**Q: Can I use the same SAS URL for multiple connectors?**
+A: Yes, but ensure the SAS URL has appropriate permissions for all required containers and coordinate expiration management across all connectors.
+
+**Q: What happens to files after they're processed?**
+A: Source files are automatically moved to processed backup directories to prevent re-processing. Manual re-processing requires copying files back to input containers.
+
+**Q: How do I handle urgent translation requests?**
+A: For urgent requests, manually upload files to input containers and coordinate with your LILT team to prioritize processing.
+
+**Q: Can I separate different programs within the same blob structure?**
+A: Complex organizational requirements may need either separate blob containers or top-level folder restructuring. Consult with your LILT Production Strategist for optimal configuration.
+
+**Q: What's the maximum file size supported?**
+A: File size limits depend on Azure Blob Storage limitations and LILT processing capabilities. Contact your LILT team for guidance on large file handling.
+
+**Q: How do I track translation progress?**
+A: Monitor progress through LILT's project dashboard and Azure Storage Explorer. Files move between containers as they progress through the translation workflow.
+
+## Integration Examples
+
+### Enterprise Multi-Language Setup
+
+For large organizations managing multiple language pairs and content types:
+
+- **Separate containers per language direction** for clear organization
+- **UUID-based project identification** for tracking and coordination
+- **Automated archive management** for compliance and backup requirements
+- **Role-based access control** using different SAS URLs for different teams
+
+### Development Workflow Integration
+
+Integrate with CI/CD pipelines for continuous localization:
+
+- **Git hooks** trigger file uploads to Azure containers
+- **Automated project creation** when new content is detected  
+- **Status callbacks** update development systems when translations complete
+- **Release coordination** ensures translations are ready for deployment
+
+## Additional Resources
+
+- [Microsoft Azure SAS Documentation](https://learn.microsoft.com/en-us/azure/storage/common/storage-sas-overview)
+- [Rclone Azure Blob Documentation](https://rclone.org/azureblob/#sas-url)
+- [LILT Supported File Formats](https://support.lilt.com/kb/supported-file-formats)
+- Work with your LILT Production Strategist for workflow optimization
+- Contact your LILT Account Executive for enterprise features and custom configurations

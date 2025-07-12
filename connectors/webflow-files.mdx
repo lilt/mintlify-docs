@@ -1,0 +1,293 @@
+---
+title: "Webflow Files Connector"
+description: "Connect your Webflow file assets to LILT for seamless translation of downloadable content and documents"
+---
+
+## Overview
+
+The Webflow Files connector enables you to sync and manage translation of file assets between your Webflow CMS and LILT platform. This specialized connector focuses on translating downloadable documents, PDFs, and other file assets hosted in Webflow, complementing the standard Webflow connector for comprehensive multilingual website management.
+
+## Prerequisites
+
+Before setting up the Webflow Files connector, ensure you have:
+
+- Webflow account with CMS and hosting plan
+- Admin or Editor permissions in Webflow
+- Access to Webflow API token
+- File assets uploaded to Webflow CMS
+- Files in supported formats (see [supported file types](/guides/supported-formats))
+
+## Required Configuration Parameters
+
+### Authentication
+
+<ParamField path="webflow_api_token" type="string" required>
+  Your Webflow API token from the account settings
+</ParamField>
+
+<ParamField path="site_id" type="string" required>
+  Your Webflow site ID where the file assets are hosted
+</ParamField>
+
+### Collection Configuration
+
+<ParamField path="collection_id" type="string" required>
+  Webflow CMS collection ID containing the file assets
+</ParamField>
+
+<ParamField path="file_field_slug" type="string" required>
+  The slug of the file field in your Webflow collection (e.g., `download-file`)
+</ParamField>
+
+<ParamField path="source_language" type="string" required>
+  Source language code (e.g., `en`, `en-US`)
+</ParamField>
+
+<ParamField path="target_languages" type="array" required>
+  Array of target language codes (e.g., `["de", "fr", "es"]`)
+</ParamField>
+
+## Optional Configuration Parameters
+
+### File Filtering
+
+<ParamField path="file_types" type="array" optional>
+  List of file extensions to process (e.g., `[".pdf", ".docx", ".xlsx"]`)
+</ParamField>
+
+<ParamField path="min_file_size" type="number" optional>
+  Minimum file size in bytes to process
+</ParamField>
+
+<ParamField path="max_file_size" type="number" optional>
+  Maximum file size in bytes to process (default: 50MB)
+</ParamField>
+
+### Metadata Configuration
+
+<ParamField path="title_field_slug" type="string" optional>
+  Slug of the title field for file descriptions
+</ParamField>
+
+<ParamField path="description_field_slug" type="string" optional>
+  Slug of the description field for file metadata
+</ParamField>
+
+<ParamField path="category_field_slug" type="string" optional>
+  Slug of the category field for file organization
+</ParamField>
+
+### Publishing Settings
+
+<ParamField path="auto_publish" type="boolean" optional default="false">
+  Whether to automatically publish translated file assets
+</ParamField>
+
+<ParamField path="create_language_collections" type="boolean" optional default="true">
+  Whether to create separate collections for each target language
+</ParamField>
+
+<ParamField path="language_suffix" type="string" optional default="locale">
+  Suffix to add to collection names for language variants (e.g., `-de`, `-fr`)
+</ParamField>
+
+### Advanced Settings
+
+<ParamField path="preserve_file_structure" type="boolean" optional default="true">
+  Whether to maintain original file organization in translated versions
+</ParamField>
+
+<ParamField path="update_existing_files" type="boolean" optional default="true">
+  Whether to update existing translated files when source files change
+</ParamField>
+
+<ParamField path="backup_original_files" type="boolean" optional default="true">
+  Whether to maintain backups of original files before translation
+</ParamField>
+
+## Setup Instructions
+
+### Step 1: Generate Webflow API Token
+
+1. **Access Account Settings**
+   - Log into your Webflow account
+   - Go to **Account Settings** → **API Access**
+
+2. **Generate API Token**
+   - Click **Generate API Token**
+   - Name: "LILT Files Connector"
+   - Copy the token securely
+
+### Step 2: Identify Site and Collection Information
+
+1. **Get Site ID**
+   - Navigate to your Webflow project
+   - Go to **Project Settings** → **General**
+   - Copy the Site ID
+
+2. **Locate File Collection**
+   - Go to **CMS** → **Collections**
+   - Identify the collection containing your file assets
+   - Note the Collection ID and field slugs
+
+### Step 3: Configure File Fields
+
+1. **Identify File Fields**
+   - Open your file collection
+   - Note the slug of the main file field
+   - Identify any title, description, or metadata fields
+
+2. **Plan Language Structure**
+   - Decide on language organization (separate collections vs. single collection)
+   - Plan field structure for multilingual metadata
+   - Consider URL structure for translated files
+
+### Step 4: Configure LILT Connector
+
+1. **Add Connector in LILT**
+   - Navigate to Settings → Connectors in LILT
+   - Select "Webflow Files" from the available connectors
+
+2. **Enter Configuration**
+   - Input all required parameters from previous steps
+   - Test the connection to ensure proper authentication
+
+3. **Validate File Access**
+   - Run a test to verify file assets can be accessed
+   - Check that file filtering works as expected
+
+## Advanced Configuration
+
+### Multi-Collection Setup
+
+For sites with multiple file collections:
+
+```yaml
+collections:
+  documents:
+    collection_id: "col-doc-001"
+    file_field_slug: "document-file"
+    title_field_slug: "document-title"
+  resources:
+    collection_id: "col-res-002"
+    file_field_slug: "resource-file"
+    title_field_slug: "resource-name"
+```
+
+### Custom Field Mapping
+
+Configure translation of specific Webflow fields:
+
+<ParamField path="field_mappings" type="object" optional>
+  Map Webflow CMS fields to translation requirements
+</ParamField>
+
+### Automated Workflow
+
+<ParamField path="webhook_url" type="string" optional>
+  Webhook URL for receiving Webflow collection updates
+</ParamField>
+
+<ParamField path="sync_schedule" type="string" optional>
+  Schedule for automatic file synchronization (cron format)
+</ParamField>
+
+## Best Practices
+
+### File Organization
+- Use consistent naming conventions for file assets
+- Organize files in logical categories within Webflow collections
+- Implement proper tagging and metadata systems
+- Maintain clean folder structures for different content types
+
+### Translation Management
+- Plan file versioning for translated assets
+- Use descriptive titles and descriptions for better context
+- Implement proper file naming for multilingual assets
+- Consider file format compatibility across languages
+
+### Performance Optimization
+- Optimize file sizes before uploading to Webflow
+- Use appropriate file compression for different content types
+- Monitor Webflow hosting bandwidth usage
+- Implement efficient file filtering to reduce processing time
+
+### SEO and Accessibility
+- Translate file titles and descriptions for SEO
+- Ensure translated files maintain accessibility standards
+- Use proper alt text for downloadable content previews
+- Implement proper URL structures for multilingual files
+
+## Troubleshooting
+
+### Common Issues
+
+**API Access Problems**
+- Verify API token is valid and not expired
+- Check site permissions and access rights
+- Confirm collection exists and is accessible
+- Test API connectivity using Webflow's API tools
+
+**File Processing Issues**
+- Verify file field slugs are correct
+- Check that files exist in the specified collection
+- Ensure file formats are supported for translation
+- Confirm file sizes are within processing limits
+
+**Collection Structure Problems**
+- Validate collection ID and field configuration
+- Check that required fields exist in the collection
+- Ensure proper field types for file uploads
+- Verify collection permissions and access
+
+### Error Messages
+
+| Error | Description | Solution |
+|-------|-------------|----------|
+| `InvalidAPIToken` | API token is invalid or expired | Regenerate token in Webflow account settings |
+| `SiteNotFound` | Site ID is incorrect | Verify site ID from Webflow project settings |
+| `CollectionNotFound` | Collection ID doesn't exist | Check collection configuration and permissions |
+| `FieldNotFound` | Specified field slug doesn't exist | Verify field slugs in Webflow CMS |
+| `FileNotAccessible` | File cannot be downloaded or processed | Check file permissions and availability |
+| `FileSizeExceeded` | File exceeds size limits | Reduce file size or adjust size limits |
+
+### Performance Optimization
+
+- Use file filtering to process only necessary assets
+- Implement efficient file caching strategies
+- Monitor Webflow API rate limits and usage
+- Optimize file organization for faster processing
+- Use batch processing for large file volumes
+
+### Support Resources
+
+- Check Webflow system status and API availability
+- Review Webflow API documentation for updates
+- Monitor file processing logs for errors
+- Contact LILT support for connector-specific issues
+
+## FAQ
+
+**Q: What file types can be translated through the Webflow Files connector?**
+A: The connector supports common document formats including PDF, Word documents, Excel files, PowerPoint presentations, and other text-based file formats.
+
+**Q: How are translated files organized in Webflow?**
+A: You can configure the connector to create separate collections for each language or maintain all language versions within the same collection with language identifiers.
+
+**Q: Can I translate file metadata and descriptions?**
+A: Yes, the connector can translate file titles, descriptions, and other text fields associated with file assets in your Webflow collections.
+
+**Q: What happens to file URLs after translation?**
+A: Translated files get new URLs in Webflow, and the connector can update references and maintain proper linking structure.
+
+**Q: Can I maintain different file versions for different languages?**
+A: Yes, the connector supports versioning and can maintain separate file versions for each target language.
+
+**Q: How are file updates handled?**
+A: The connector can monitor for file changes in Webflow and automatically update translated versions when source files are modified.
+
+**Q: Can I preview translated files before publishing?**
+A: Yes, you can configure the connector to create draft versions of translated files for review before publishing to your live Webflow site.
+
+**Q: What file size limitations apply?**
+A: The connector respects Webflow's file size limits and can be configured with custom size thresholds for optimal processing performance.
