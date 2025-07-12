@@ -16,9 +16,7 @@
           {
             "group": "Get Started",
             "pages": [
-              "index",
-              "quickstart",
-              "development"
+              "index"
             ]
           },
           {
@@ -90,8 +88,8 @@
     }
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "/images/Lilt-Logo Large_Color.png",
+    "dark": "/images/Lilt-Logo Large_Color.png"
   },
   "navbar": {
     "links": [
