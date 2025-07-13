@@ -3,9 +3,9 @@
   "theme": "mint",
   "name": "LILT",
   "colors": {
-    "primary": "#2563eb",
-    "light": "#3b82f6",
-    "dark": "#1e40af"
+    "primary": "#071B5A",
+    "light": "#071B5A",
+    "dark": "#071B5A"
   },
   "favicon": "/favicon.svg",
   "navigation": {
