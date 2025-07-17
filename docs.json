@@ -5,7 +5,7 @@
   "colors": {
     "primary": "#071B5A",
     "light": "#071B5A",
-    "dark": "#071B5A"
+    "dark": "#EEEEF6"
   },
   "favicon": "/favicon.svg",
   "navigation": {
@@ -16,7 +16,8 @@
           {
             "group": "Get Started",
             "pages": [
-              "index"
+              "index",
+              "navigating-translation-interface"
             ]
           },
           {
@@ -47,8 +48,7 @@
         ]
       },
       {
-        "tab": "API Reference",
-        "openapi": "api-reference/public-http-api-swagger.yaml"
+        "tab": "API Reference"
       }
     ],
     "global": {
