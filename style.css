@@ -30,6 +30,24 @@ body, html {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-family-base) !important;
+  background: linear-gradient(rgb(53, 41, 190), rgb(7, 27, 90));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Dark mode headers override */
+[data-theme="dark"] h1, 
+[data-theme="dark"] h2, 
+[data-theme="dark"] h3, 
+[data-theme="dark"] h4, 
+[data-theme="dark"] h5, 
+[data-theme="dark"] h6 {
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+  color: inherit;
 }
 
 /* Custom dark mode gradient for card content containers */
