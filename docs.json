@@ -3,9 +3,9 @@
   "theme": "mint",
   "name": "LILT",
   "colors": {
-    "primary": "#071B5A",
-    "light": "#071B5A",
-    "dark": "#EEEEF6"
+    "primary": "#2abfa3",
+    "light": "#ffffff",
+    "dark": "#081a28"
   },
   "favicon": "/favicon.svg",
   "navigation": {
@@ -71,9 +71,14 @@
       ]
     }
   },
+  "font": {
+    "family": "Basis Grotesque Pro",
+    "source": "/images/BasisGrotesquePro.otf",
+    "format": "opentype"
+  },
   "logo": {
     "light": "/images/Lilt-Logo Large_Color.png",
-    "dark": "/images/Lilt-Logo Large_Color.png"
+    "dark": "/images/logo-lilt-white.svg"
   },
   "navbar": {
     "links": [
