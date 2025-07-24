@@ -442,6 +442,15 @@ body {
   color: #ffffff;
 }
 
+/* Card hover effects and transitions */
+.card {
+  transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
 /* Custom dark mode gradient for card content containers */
 .dark .card {
   background: linear-gradient(to left bottom in oklab, rgb(14, 46, 72) 0px, rgb(10, 33, 50) 100%);
